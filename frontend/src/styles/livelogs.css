@@ -1,0 +1,59 @@
+.livelogs-container {
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 1.5em;
+    height: 500px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid #344355;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.livelogs-line {
+    margin-bottom: 1px;
+    color: #c9d1d9;
+}
+
+.livelogs-line-agent {
+    color: #58a6ff;
+}
+
+.livelogs-line-success {
+    color: #3fb950;
+}
+
+.livelogs-line-error {
+    color: #f85149;
+}
+
+.livelogs-line-warning {
+    color: #d29922;
+}
+
+.livelogs-line-copy {
+    color: #a5a5a5;
+}
+
+.livelogs-line-agentname {
+    color: #79c0ff;
+}
+
+.livelogs-empty {
+    color: #7d8590;
+    font-style: italic;
+    text-align: center;
+    margin-top: 2em;
+}
+
+.livelogs-empty-icon {
+    font-size: 2em;
+    margin-bottom: 0.5em;
+}
+
+.livelogs-empty-hint {
+    font-size: 0.8em;
+    margin-top: 0.5em;
+}
