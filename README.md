@@ -48,8 +48,8 @@ To run the backend, follow these steps:
      ```
    - On macOS/Linux:
      ```bash
-        source venv/bin/activate
-        ```
+      source venv/bin/activate
+      ```
 6. Install the required Python packages:
     ```bash
    pip install -r requirements.txt
