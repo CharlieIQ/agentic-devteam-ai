@@ -34,7 +34,7 @@ function AgentOutput({ title, agent, output, icon }) {
                             onClick={() => navigator.clipboard.writeText(output)}
                             className="copy-btn"
                         >
-                            📋 Copy
+                            📋
                         </button>
                     </div>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
