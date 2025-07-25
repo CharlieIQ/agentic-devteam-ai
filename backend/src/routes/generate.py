@@ -7,6 +7,7 @@ from ..services.requirements_service import requirements_service
 
 generate_bp = Blueprint('generate', __name__)
 
+
 @generate_bp.route('/generate', methods=['POST'])
 def generate_code():
     """Generate code using CrewAI."""
@@ -27,6 +28,7 @@ def generate_code():
         if not requirements:
             requirements = requirements_service.get_requirements()
         
+        # Validate requirements
         if not requirements or not requirements.strip():
             print("❌ No requirements found in request or storage")
             return jsonify({

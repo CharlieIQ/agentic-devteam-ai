@@ -1,58 +1,54 @@
 import unittest
-from main import Application
+from main import Application, Patient, Appointment
 
 class TestApplication(unittest.TestCase):
 
     def setUp(self):
         self.app = Application()
 
-    def test_initial_step_goal(self):
-        self.assertEqual(self.app.step_goal, 10000)
+    def test_add_patient(self):
+        self.app.add_patient("John Doe", "No known allergies")
+        patient = self.app.get_patient(0)
+        self.assertIsNotNone(patient)
+        self.assertEqual(patient.name, "John Doe")
+        self.assertEqual(patient.medical_history, "No known allergies")
 
-    def test_set_step_goal_valid(self):
-        self.app.set_step_goal(15000)
-        self.assertEqual(self.app.step_goal, 15000)
+    def test_edit_patient(self):
+        self.app.add_patient("Jane Doe", "Asthma")
+        self.app.edit_patient(0, "Jane Smith", "Asthma and allergies")
+        patient = self.app.get_patient(0)
+        self.assertEqual(patient.name, "Jane Smith")
+        self.assertEqual(patient.medical_history, "Asthma and allergies")
 
-    def test_set_step_goal_invalid(self):
-        with self.assertRaises(ValueError) as context:
-            self.app.set_step_goal(0)
-        self.assertTrue('Step goal must be greater than 0.' in str(context.exception))
+    def test_schedule_appointment(self):
+        self.app.add_patient("Emily Jones", "No medical history")
+        self.app.schedule_appointment(0, "2023-10-01 10:00")
+        appointment = self.app.get_appointment(0)
+        self.assertIsNotNone(appointment)
+        self.assertEqual(appointment.patient.name, "Emily Jones")
+        self.assertEqual(appointment.time_slot, "2023-10-01 10:00")
 
-    def test_log_steps_valid(self):
-        self.app.log_steps(5000)
-        self.assertEqual(self.app.total_steps, 5000)
+    def test_record_treatment_notes(self):
+        self.app.add_patient("Michael Brown", "Diabetes")
+        self.app.schedule_appointment(0, "2023-10-02 11:00")
+        self.app.record_treatment_notes(0, "Checked blood sugar levels")
+        appointment = self.app.get_appointment(0)
+        self.assertIn("Checked blood sugar levels", appointment.notes)
 
-    def test_log_steps_invalid(self):
-        with self.assertRaises(ValueError) as context:
-            self.app.log_steps(-500)
-        self.assertTrue('Steps cannot be negative.' in str(context.exception))
+    def test_view_schedule(self):
+        self.app.add_patient("Sara Connor", "Healthy")
+        self.app.schedule_appointment(0, "2023-10-01 09:00")
+        self.app.schedule_appointment(0, "2023-10-01 10:00")
+        appointments = self.app.view_schedule("2023-10-01")
+        self.assertEqual(len(appointments), 2)
 
-    def test_check_progress_not_met(self):
-        self.app.log_steps(5000)
-        message = self.app.check_progress()
-        self.assertIn("Wow, did you even get out of bed today?", message)
+    def test_get_non_existent_patient(self):
+        patient = self.app.get_patient(99)
+        self.assertIsNone(patient)
 
-    def test_check_progress_met(self):
-        self.app.log_steps(15000)
-        message = self.app.check_progress()
-        self.assertIn("Amazing! You've crushed your goal! 🎉", message)
-
-    def test_save_daily_steps(self):
-        self.app.log_steps(12000)
-        self.app.save_daily_steps("2023-10-01")
-        self.assertEqual(self.app.get_step_history(), {"2023-10-01": 12000})
-        self.assertEqual(self.app.total_steps, 0)
-
-    def test_get_step_history(self):
-        self.app.log_steps(10000)
-        self.app.save_daily_steps("2023-10-01")
-        self.app.log_steps(8000)
-        self.app.save_daily_steps("2023-10-02")
-        history = self.app.get_step_history()
-        self.assertEqual(history, {
-            "2023-10-01": 10000,
-            "2023-10-02": 8000
-        })
+    def test_get_non_existent_appointment(self):
+        appointment = self.app.get_appointment(99)
+        self.assertIsNone(appointment)
 
 if __name__ == '__main__':
     unittest.main()

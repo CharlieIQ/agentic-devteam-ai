@@ -1,10 +1,31 @@
 # Charlie's AI Development Team
 
 ## Overview
-This repository contains the codebase for my agentic AI development team built using CrewAI, focusing on building fullstack software applications. 
+This repository contains the codebase for my agentic AI development team built using [CrewAI](https://github.com/crew-ai/crew-ai), focusing on building fullstack software applications.
 
-The team is dedicated to creating innovative AI solutions that enhance productivity and streamline workflows.
+The project is designed to automate the process of software development by utilizing AI agents that can handle various tasks such as requirement gathering, design, coding, and testing.
 
+This was a project built based off of a project done for a course in [Agentic AI](https://github.com/ed-donner/agents) by Ed Donner. I just expanded on it to create a frontend, better logging, and more features.
+
+## Features
+- **Frontend**: A React-based frontend for interacting with the AI agents.
+- **Backend**: A Python-based backend that manages the AI agents and their tasks.
+- **Task Management**: AI agents can handle tasks such as requirement gathering, design, coding, and testing.
+- **Logging**: Comprehensive logging of agent activities and task progress.
+- **Configuration**: Easily configurable tasks and agents through YAML files.
+
+## Technologies Used
+- **Frontend**: React, Vite, CSS
+- **Backend**: Python, Flask, CrewAI
+- **AI**: OpenAI API for natural language processing and task management
+
+## AI Agents
+- **Engineering Lead**: Gathers requirements and designs the software architecture.
+- **Frontend Engineer**: Implements the frontend based on the design provided by the engineering lead.
+- **Backend Engineer**: Implements the backend logic and integrates with the frontend.
+- **QA Engineer**: Tests the software to ensure it meets the requirements and is bug-free.
+
+I'm using gpt-4o-mini .
 ## Getting Started
 ### Running the frontend
 To get started with the project, follow these steps:

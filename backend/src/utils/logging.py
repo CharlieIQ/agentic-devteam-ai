@@ -82,9 +82,8 @@ class CrewAILogCapture:
         # - Borders, progress, assignment, or emoji-only lines
         exclude_patterns = [
             r'^Status:', r'^Assigned to:', r'^Crew:', r'^├──', r'^└──', r'^│', r'^╭─', r'^╰─', r'─────',
-            r'🤖', r'📋', r'✅$', r'⚠️', r'❌', r'Executing Task', r'Agent Started', r'Agent Completed',
-            r'^Let me', r'^I need to', r'Engineering Team Lead', r'Senior Backend Engineer',
-            r'Frontend Engineer', r'Test Engineer', r'Task Completion', r'Client connected', r'Client disconnected',
+            r'🤖', r'📋', r'✅$', r'⚠️', r'❌', r'Executing Task', r'Agent Started',
+            r'^Let me', r'^I need to', r'Client connected', r'Client disconnected',
             r'werkzeug', r'INFO', r'DEBUG', r'WARNING', r'ERROR', r'HTTP/1.1', r'Starting Flask', r'Running on',
             r'__main__', r'\[HEARTBEAT\]', r'crewai\[tools\]', r'Traceback'
         ]
