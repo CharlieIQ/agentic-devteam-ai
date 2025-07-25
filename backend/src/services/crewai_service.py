@@ -5,6 +5,7 @@ import os
 import sys
 from typing import Dict, Any, Optional
 import traceback
+from ..config import Config
 
 class CrewAIService:
     """Service for managing CrewAI operations."""
@@ -63,7 +64,7 @@ class CrewAIService:
             
             result = engineering_team.crew().kickoff(inputs=inputs)
             
-            # Extract structured outputs from all tasks
+            # Extract structured outputs from all tasks using config
             outputs = self._extract_outputs(result)
             
             print("🎉 Code generation completed successfully!")
@@ -81,37 +82,36 @@ class CrewAIService:
             raise RuntimeError(f"Code generation failed: {str(e)}")
     
     def _extract_outputs(self, result) -> Dict[str, Dict[str, str]]:
-        """Extract structured outputs from CrewAI result."""
+        """Extract structured outputs from CrewAI result using configuration."""
         outputs = {}
+        task_order = Config.get_task_order()
+        agent_config = Config.get_all_agents()
         
         if hasattr(result, 'tasks_output') and result.tasks_output:
             print(f"📊 Found {len(result.tasks_output)} task outputs")
             
             for i, task_output in enumerate(result.tasks_output):
-                task_name = ['design', 'backend_code', 'frontend_code', 'tests'][i] if i < 4 else f'task_{i}'
-                agent_name = 'Unknown'
+                # Use config to determine task name and agent info
+                task_key = task_order[i] if i < len(task_order) else f'task_{i}'
+                config = agent_config.get(task_key, {})
+                agent_name = config.get('name', 'Unknown')
                 
-                # Try to get agent name from task output
-                if hasattr(task_output, 'agent'):
-                    agent_name = str(task_output.agent)
-                elif hasattr(task_output, 'task') and hasattr(task_output.task, 'agent'):
-                    agent_name = str(task_output.task.agent.role)
+                # Try to get agent name from task output if not in config
+                if agent_name == 'Unknown':
+                    if hasattr(task_output, 'agent'):
+                        agent_name = str(task_output.agent)
+                    elif hasattr(task_output, 'task') and hasattr(task_output.task, 'agent'):
+                        agent_name = str(task_output.task.agent.role)
                 
                 output_text = str(task_output.raw if hasattr(task_output, 'raw') else task_output)
                 
-                outputs[task_name] = {
+                outputs[task_key] = {
                     'agent': agent_name,
                     'output': output_text
                 }
-                print(f"✅ Task {i+1} ({task_name}): {len(output_text)} characters from {agent_name}")
-        else:
-            # Fallback for single output
-            print("📝 Using fallback for single output")
-            outputs['complete_result'] = {
-                'agent': 'Engineering Team',
-                'output': str(result.raw if hasattr(result, 'raw') else result)
-            }
+                print(f"✅ Task {i+1} ({task_key}): {len(output_text)} characters from {agent_name}")
         
+        # No fallback needed - frontend will combine outputs
         return outputs
 
 

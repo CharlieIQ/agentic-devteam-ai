@@ -39,5 +39,6 @@ lerna-debug.log*
 backend/venv/
 # ALL Python cache files
 backend/__pycache__/
+backend/**/*.pyc
 __pycache__/
 __pycache__/

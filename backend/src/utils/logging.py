@@ -54,40 +54,51 @@ class CrewAILogCapture:
         if not line or len(line.strip()) < 3:
             return False
 
-        # Only include lines that are:
-        # - Agent role lines
-        # - Task lines
-        # - Requirements/instructions/test instructions
-        # - Lines containing 'Requirements:', '📝', or test-related keywords
+        # Much more relaxed include patterns - capture most agent activity
         include_patterns = [
             r'^Agent:\s',                # Agent: ...
             r'^Task:\s',                 # Task: ...
+            r'Agent.*:',                 # Any agent speaking
             r'Requirements:',            # Requirements: ...
+            r'Design:',                  # Design discussions
+            r'Implementation:',          # Implementation notes
+            r'Testing:',                 # Testing discussions
+            r'Frontend:',                # Frontend discussions
+            r'Backend:',                 # Backend discussions
+            r'\banalyzing\b',            # analyzing
+            r'\bimplementing\b',         # implementing
+            r'\bcreating\b',             # creating
+            r'\bbuilding\b',             # building
+            r'\bdesigning\b',            # designing
+            r'\btesting\b',              # testing
+            r'\bwriting\b',              # writing
+            r'\bcode\b',                 # code
+            r'\bfunction\b',             # function
+            r'\bclass\b',                # class
+            r'\bmethod\b',               # method
+            r'\bAPI\b',                  # API
+            r'\bUI\b',                   # UI
+            r'\bcomponent\b',            # component
             r'📝',                       # Emoji for requirements
-            r'\btest(s)?\b',             # test, tests
-            r'\bunit test(s)?\b',        # unit test(s)
-            r'\bintegration test(s)?\b', # integration test(s)
-            r'\bend-to-end\b',           # end-to-end
-            r'\bmock\b',                 # mock
-            r'\bcoverage\b',             # coverage
-            r'\bedge case(s)?\b',        # edge case(s)
-            r'^\s*\d+\.\s',              # Numbered requirements/instructions
-            r'^\s*✅',                   # Checked requirements
-            r'^\s*⚙️',                   # Non-functional requirements
+            r'🔧',                       # Tools/implementation
+            r'💻',                       # Code/development
+            r'🎨',                       # Design/frontend
+            r'🧪',                       # Testing
+            r'⚙️',                       # Backend/systems
+            r'^\s*\d+\.\s',              # Numbered lists
+            r'^\s*[-*]\s',               # Bullet points
         ]
 
-        # Exclude lines that are:
-        # - Status/progress/crew/assignment/emoji/status lines
-        # - Empty or whitespace
-        # - Borders, progress, assignment, or emoji-only lines
+        # Much more restricted exclude patterns - only exclude noise
         exclude_patterns = [
-            r'^Status:', r'^Assigned to:', r'^Crew:', r'^├──', r'^└──', r'^│', r'^╭─', r'^╰─', r'─────',
-            r'🤖', r'📋', r'✅$', r'⚠️', r'❌', r'Executing Task', r'Agent Started',
-            r'^Let me', r'^I need to', r'Client connected', r'Client disconnected',
-            r'werkzeug', r'INFO', r'DEBUG', r'WARNING', r'ERROR', r'HTTP/1.1', r'Starting Flask', r'Running on',
-            r'__main__', r'\[HEARTBEAT\]', r'crewai\[tools\]', r'Traceback'
+            r'werkzeug', r'HTTP/1.1', r'Starting Flask', r'Running on',
+            r'__main__', r'\[HEARTBEAT\]', r'Traceback', r'^\s*$',
+            r'Client connected', r'Client disconnected',
+            r'^Status: (Starting|Stopping|Complete)$',  # Only exclude basic status
+            r'─{3,}',  # Long dashes (borders)
         ]
 
+        import re
         # If any exclude pattern matches, skip
         for pat in exclude_patterns:
             if re.search(pat, line):
@@ -98,7 +109,13 @@ class CrewAILogCapture:
             if re.search(pat, line, re.IGNORECASE):
                 return True
 
-        # Otherwise, skip
+        # Also allow any line that's reasonably long and contains useful words
+        useful_keywords = ['develop', 'build', 'create', 'implement', 'design', 'test', 'user', 'data', 'system', 'application']
+        if len(line) > 20:  # Reasonable length
+            for keyword in useful_keywords:
+                if keyword.lower() in line.lower():
+                    return True
+
         return False
 
     def flush(self):

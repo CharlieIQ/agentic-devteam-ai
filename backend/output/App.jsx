@@ -1,102 +1,89 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
-import './styles.css'; // Assuming you have a styles.css for basic styling
+import ReactDOM from 'react-dom';
+import './styles.css';
 
-const API_URL = 'http://localhost:5000'; // Adjust if your backend runs on a different port
-
-const App = () => {
-    const [patients, setPatients] = useState([]);
-    const [appointments, setAppointments] = useState([]);
-    const [selectedPatient, setSelectedPatient] = useState(null);
-    const [medicalHistory, setMedicalHistory] = useState('');
-    const [name, setName] = useState('');
-    const [timeSlot, setTimeSlot] = useState('');
-    const [notes, setNotes] = useState('');
-
-    useEffect(() => {
-        fetchPatients();
-        fetchAppointments();
-    }, []);
-
-    const fetchPatients = async () => {
-        const response = await fetch(`${API_URL}/patients`);
-        const data = await response.json();
-        setPatients(data);
-    };
-
-    const fetchAppointments = async () => {
-        const response = await fetch(`${API_URL}/appointments`);
-        const data = await response.json();
-        setAppointments(data);
-    };
-
-    const handleAddPatient = async () => {
-        await fetch(`${API_URL}/patients`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, medical_history: medicalHistory }),
-        });
-        fetchPatients();
-        setName('');
-        setMedicalHistory('');
-    };
-
-    const handleScheduleAppointment = async () => {
-        await fetch(`${API_URL}/appointments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ patient_id: selectedPatient.id, time_slot: timeSlot }),
-        });
-        fetchAppointments();
-        setTimeSlot('');
-    };
-
-    const handleRecordNotes = async (appointmentId) => {
-        await fetch(`${API_URL}/appointments/${appointmentId}/notes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ notes }),
-        });
-        fetchAppointments();
-        setNotes('');
-    };
-
+const Cell = ({ cell, onLeftClick, onRightClick }) => {
     return (
-        <div className="app">
-            <h1>Dentist Appointment Manager</h1>
-            <div>
-                <h2>Patients</h2>
-                <ul>
-                    {patients.map(patient => (
-                        <li key={patient.id} onClick={() => setSelectedPatient(patient)}>
-                            {patient.name} - {patient.medical_history}
-                        </li>
-                    ))}
-                </ul>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Patient Name" />
-                <input value={medicalHistory} onChange={e => setMedicalHistory(e.target.value)} placeholder="Medical History" />
-                <button onClick={handleAddPatient}>Add Patient</button>
-            </div>
-            {selectedPatient && (
-                <div>
-                    <h2>Schedule Appointment for {selectedPatient.name}</h2>
-                    <input value={timeSlot} onChange={e => setTimeSlot(e.target.value)} placeholder="Time Slot (YYYY-MM-DD HH:MM)" />
-                    <button onClick={handleScheduleAppointment}>Schedule Appointment</button>
-                    <h2>Previous Appointments</h2>
-                    <ul>
-                        {appointments.filter(appt => appt.patient.id === selectedPatient.id).map((appt, index) => (
-                            <li key={index}>
-                                {appt.time_slot}
-                                <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add Notes" />
-                                <button onClick={() => handleRecordNotes(index)}>Add Notes</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+        <div
+            className={`cell ${cell.is_revealed ? (cell.is_mine ? 'mine' : '') : (cell.is_flagged ? 'flagged' : '')}`}
+            onClick={onLeftClick}
+            onContextMenu={onRightClick}
+        >
+            {cell.is_revealed && !cell.is_mine ? (cell.adjacent_mines > 0 ? cell.adjacent_mines : '') : ''}
         </div>
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+const Minesweeper = () => {
+    const [grid, setGrid] = useState([]);
+    const [gameOver, setGameOver] = useState(false);
+    const [won, setWon] = useState(false);
+    
+    const gridSize = { rows: 9, cols: 9 };
+    const mineCount = 10;
+
+    useEffect(() => {
+        startGame();
+    }, []);
+
+    const startGame = () => {
+        // Call backend to initialize the game
+        fetch('/api/start-game', { method: 'POST', body: JSON.stringify({ gridSize, mineCount }), headers: { 'Content-Type': 'application/json' } })
+            .then(response => response.json())
+            .then(data => setGrid(data.grid));
+        setGameOver(false);
+        setWon(false);
+    };
+
+    const handleLeftClick = (row, col) => {
+        if (gameOver || grid[row][col].is_revealed) return;
+        // Call backend to reveal cell
+        fetch(`/api/reveal-cell?row=${row}&col=${col}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                setGrid(data.grid);
+                setGameOver(data.game_over);
+                setWon(data.has_won);
+            });
+    };
+
+    const handleRightClick = (row, col) => {
+        if (gameOver || grid[row][col].is_revealed) return;
+        // Call backend to flag/unflag cell
+        fetch(`/api/flag-cell?row=${row}&col=${col}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => setGrid(data.grid));
+    };
+
+    const restartGame = () => startGame();
+
+    const showEndDialog = () => {
+        const message = won ? "Congratulations! You win!" : "You hit a mine! Game Over!";
+        alert(message);
+        restartGame();
+    };
+
+    return (
+        <div className="minesweeper">
+            <h1>Minesweeper</h1>
+            <div className="grid">
+                {grid.map((row, rowIndex) => (
+                    <div key={rowIndex} className="row">
+                        {row.map((cell, colIndex) => (
+                            <Cell
+                                key={colIndex}
+                                cell={cell}
+                                onLeftClick={() => handleLeftClick(rowIndex, colIndex)}
+                                onRightClick={(e) => { e.preventDefault(); handleRightClick(rowIndex, colIndex); }}
+                            />
+                        ))}
+                    </div>
+                ))}
+            </div>
+            <button onClick={restartGame}>Restart</button>
+            {gameOver && showEndDialog()}
+        </div>
+    );
+};
+
+ReactDOM.render(<Minesweeper />, document.getElementById('root'));

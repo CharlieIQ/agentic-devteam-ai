@@ -1,54 +1,84 @@
 import unittest
-from main import Application, Patient, Appointment
+from main import Application, Cell, GameLogic
 
+class TestCell(unittest.TestCase):
+
+    def test_initialize_cell(self):
+        cell = Cell(is_mine=True)
+        self.assertTrue(cell.is_mine)
+        self.assertFalse(cell.is_revealed)
+        self.assertFalse(cell.is_flagged)
+
+    def test_reveal_cell(self):
+        cell = Cell(is_mine=False)
+        cell.reveal()
+        self.assertTrue(cell.is_revealed)
+
+    def test_flag_cell(self):
+        cell = Cell(is_mine=False)
+        cell.flag()
+        self.assertTrue(cell.is_flagged)
+
+    def test_unflag_cell(self):
+        cell = Cell(is_mine=False)
+        cell.flag()
+        cell.unflag()
+        self.assertFalse(cell.is_flagged)
+
+
+class TestGameLogic(unittest.TestCase):
+
+    def setUp(self):
+        self.game_logic = GameLogic(grid_size=(3, 3), mine_count=1)
+
+    def test_generate_grid_size(self):
+        self.assertEqual(len(self.game_logic.grid), 3)
+        self.assertEqual(len(self.game_logic.grid[0]), 3)
+
+    def test_place_mines(self):
+        mine_count = sum(cell.is_mine for row in self.game_logic.grid for cell in row)
+        self.assertEqual(mine_count, 1)
+
+    def test_adjacent_mine_count(self):
+        self.assertTrue(hasattr(self.game_logic.grid[0][0], 'adjacent_mines'))
+
+    def test_is_safe_cell(self):
+        self.assertFalse(self.game_logic.is_safe_cell(0, 0))
+
+        
 class TestApplication(unittest.TestCase):
 
     def setUp(self):
-        self.app = Application()
+        self.app = Application(grid_size=(3, 3), mine_count=1)
 
-    def test_add_patient(self):
-        self.app.add_patient("John Doe", "No known allergies")
-        patient = self.app.get_patient(0)
-        self.assertIsNotNone(patient)
-        self.assertEqual(patient.name, "John Doe")
-        self.assertEqual(patient.medical_history, "No known allergies")
+    def test_start_game(self):
+        self.app.start_game()
+        self.assertFalse(self.app.game_over)
+        self.assertFalse(self.app.won)
 
-    def test_edit_patient(self):
-        self.app.add_patient("Jane Doe", "Asthma")
-        self.app.edit_patient(0, "Jane Smith", "Asthma and allergies")
-        patient = self.app.get_patient(0)
-        self.assertEqual(patient.name, "Jane Smith")
-        self.assertEqual(patient.medical_history, "Asthma and allergies")
+    def test_handle_left_click_reveal_mine(self):
+        self.app.start_game()
+        for row in range(3):
+            for col in range(3):
+                if self.app.logic.grid[row][col].is_mine:
+                    self.app.handle_left_click(row, col)
+                    self.assertTrue(self.app.game_over)
 
-    def test_schedule_appointment(self):
-        self.app.add_patient("Emily Jones", "No medical history")
-        self.app.schedule_appointment(0, "2023-10-01 10:00")
-        appointment = self.app.get_appointment(0)
-        self.assertIsNotNone(appointment)
-        self.assertEqual(appointment.patient.name, "Emily Jones")
-        self.assertEqual(appointment.time_slot, "2023-10-01 10:00")
+    def test_handle_left_click_reveal_safe_cell(self):
+        self.app.start_game()
+        for row in range(3):
+            for col in range(3):
+                if not self.app.logic.grid[row][col].is_mine:
+                    self.app.handle_left_click(row, col)
+                    self.assertTrue(self.app.logic.grid[row][col].is_revealed)
 
-    def test_record_treatment_notes(self):
-        self.app.add_patient("Michael Brown", "Diabetes")
-        self.app.schedule_appointment(0, "2023-10-02 11:00")
-        self.app.record_treatment_notes(0, "Checked blood sugar levels")
-        appointment = self.app.get_appointment(0)
-        self.assertIn("Checked blood sugar levels", appointment.notes)
-
-    def test_view_schedule(self):
-        self.app.add_patient("Sara Connor", "Healthy")
-        self.app.schedule_appointment(0, "2023-10-01 09:00")
-        self.app.schedule_appointment(0, "2023-10-01 10:00")
-        appointments = self.app.view_schedule("2023-10-01")
-        self.assertEqual(len(appointments), 2)
-
-    def test_get_non_existent_patient(self):
-        patient = self.app.get_patient(99)
-        self.assertIsNone(patient)
-
-    def test_get_non_existent_appointment(self):
-        appointment = self.app.get_appointment(99)
-        self.assertIsNone(appointment)
+    def test_check_win(self):
+        self.app.start_game()
+        for row in range(3):
+            for col in range(3):
+                if not self.app.logic.grid[row][col].is_mine:
+                    self.app.logic.grid[row][col].reveal()
+        self.assertTrue(self.app.check_win())    
 
 if __name__ == '__main__':
     unittest.main()

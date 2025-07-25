@@ -1,131 +1,150 @@
+from typing import List, Tuple
+import random
+
+class Cell:
+    def __init__(self, is_mine: bool) -> None:
+        self.is_mine = is_mine
+        self.is_revealed = False
+        self.is_flagged = False
+
+    def reveal(self) -> None:
+        self.is_revealed = True
+
+    def flag(self) -> None:
+        self.is_flagged = True
+
+    def unflag(self) -> None:
+        self.is_flagged = False
+
+    def is_revealed(self) -> bool:
+        return self.is_revealed
+
+    def is_flagged(self) -> bool:
+        return self.is_flagged
+
+
+class GameLogic:
+    def __init__(self, grid_size: Tuple[int, int], mine_count: int) -> None:
+        self.grid_size = grid_size
+        self.mine_count = mine_count
+        self.grid = self.generate_grid()
+
+    def generate_grid(self) -> List[List[Cell]]:
+        grid = [[Cell(False) for _ in range(self.grid_size[1])] for _ in range(self.grid_size[0])]
+        self.place_mines(grid)
+        self.count_adjacent_mines(grid)
+        return grid
+
+    def place_mines(self, grid: List[List[Cell]]) -> None:
+        mine_locations = set()
+        while len(mine_locations) < self.mine_count:
+            row = random.randint(0, self.grid_size[0] - 1)
+            col = random.randint(0, self.grid_size[1] - 1)
+            if (row, col) not in mine_locations:
+                mine_locations.add((row, col))
+                grid[row][col] = Cell(True)
+
+    def count_adjacent_mines(self, grid: List[List[Cell]]) -> None:
+        for row in range(self.grid_size[0]):
+            for col in range(self.grid_size[1]):
+                if grid[row][col].is_mine:
+                    continue
+                count = 0
+                for r in range(max(0, row - 1), min(row + 2, self.grid_size[0])):
+                    for c in range(max(0, col - 1), min(col + 2, self.grid_size[1])):
+                        if grid[r][c].is_mine:
+                            count += 1
+                grid[row][col].adjacent_mines = count
+
+    def is_safe_cell(self, row: int, col: int) -> bool:
+        return not self.grid[row][col].is_mine
+
+
 class Application:
-    """Main application class to manage dentist appointments and patient information."""
+    def __init__(self, grid_size: Tuple[int, int], mine_count: int) -> None:
+        self.grid_size = grid_size
+        self.mine_count = mine_count
+        self.logic = GameLogic(grid_size, mine_count)
+        self.game_over = False
+        self.won = False
 
-    def __init__(self):
-        """Initialize the Application with empty lists for appointments and patients."""
-        self.patients = []
-        self.appointments = []
+    def start_game(self) -> None:
+        self.logic = GameLogic(self.grid_size, self.mine_count)
+        self.game_over = False
+        self.won = False
+        self.render()
 
-    def add_patient(self, name: str, medical_history: str):
-        """
-        Add a new patient to the system.
+    def render(self) -> None:
+        # Placeholder for rendering logic in a web browser
+        pass
         
-        :param name: Name of the patient.
-        :param medical_history: Basic medical history of the patient.
-        """
-        patient = Patient(name, medical_history)
-        self.patients.append(patient)
+    def handle_left_click(self, row: int, col: int) -> None:
+        if self.game_over or self.logic.grid[row][col].is_revealed:
+            return
+        
+        self.logic.grid[row][col].reveal()
+        if self.logic.grid[row][col].is_mine:
+            self.game_over = True
+            self.show_end_dialog("You hit a mine! Game Over!")
+        else:
+            if self.logic.grid[row][col].adjacent_mines == 0:
+                self.recursive_reveal(row, col)
+        
+        if self.check_win():
+            self.game_over = True
+            self.show_end_dialog("Congratulations! You win!")
 
-    def edit_patient(self, patient_id: int, name: str, medical_history: str):
-        """
-        Edit existing patient record.
+    def handle_right_click(self, row: int, col: int) -> None:
+        if self.game_over or self.logic.grid[row][col].is_revealed:
+            return
         
-        :param patient_id: The ID of the patient to edit.
-        :param name: Updated name of the patient.
-        :param medical_history: Updated medical history of the patient.
-        """
-        patient = self.get_patient(patient_id)
-        if patient:
-            patient.name = name
-            patient.medical_history = medical_history
+        if self.logic.grid[row][col].is_flagged:
+            self.logic.grid[row][col].unflag()
+        else:
+            self.logic.grid[row][col].flag()
+        
+        self.render()
 
-    def get_patient(self, patient_id: int) -> 'Patient':
-        """
-        Retrieve a patient by their ID.
+    def recursive_reveal(self, row: int, col: int) -> None:
+        if not (0 <= row < self.grid_size[0]) or not (0 <= col < self.grid_size[1]):
+            return
+        if self.logic.grid[row][col].is_revealed or self.logic.grid[row][col].is_mine:
+            return
         
-        :param patient_id: The ID of the patient.
-        :return: Patient object or None if not found.
-        """
-        for patient in self.patients:
-            if patient.id == patient_id:
-                return patient
-        return None
+        self.logic.grid[row][col].reveal()
         
-    def schedule_appointment(self, patient_id: int, time_slot: str):
-        """
-        Schedule a new appointment for a patient.
-        
-        :param patient_id: The ID of the patient to schedule an appointment for.
-        :param time_slot: The time slot for the appointment.
-        """
-        patient = self.get_patient(patient_id)
-        if patient:
-            appointment = Appointment(patient, time_slot)
-            self.appointments.append(appointment)
+        if self.logic.grid[row][col].adjacent_mines == 0:
+            for r in range(max(0, row - 1), min(row + 2, self.grid_size[0])):
+                for c in range(max(0, col - 1), min(col + 2, self.grid_size[1])):
+                    self.recursive_reveal(r, c)
 
-    def record_treatment_notes(self, appointment_id: int, notes: str):
-        """
-        Record treatment notes for a specific appointment.
-        
-        :param appointment_id: ID of the appointment to add notes to.
-        :param notes: The treatment notes.
-        """
-        appointment = self.get_appointment(appointment_id)
-        if appointment:
-            appointment.notes.append(notes)
+    def check_win(self) -> bool:
+        for row in self.logic.grid:
+            for cell in row:
+                if not cell.is_mine and not cell.is_revealed:
+                    return False
+        return True
 
-    def get_appointment(self, appointment_id: int) -> 'Appointment':
-        """
-        Retrieve an appointment by its ID.
-        
-        :param appointment_id: The ID of the appointment.
-        :return: Appointment object or None if not found.
-        """
-        if 0 <= appointment_id < len(self.appointments):
-            return self.appointments[appointment_id]
-        return None
+    def show_end_dialog(self, message: str) -> None:
+        # Placeholder for rendering end game dialog
+        pass
 
-    def view_schedule(self, date: str) -> list:
-        """
-        View the schedule for a specific date.
-        
-        :param date: Date to view the schedule for.
-        :return: List of appointments for that date.
-        """
-        return [appt for appt in self.appointments if appt.date == date]
+    def restart_game(self) -> None:
+        self.start_game()
 
-        
-class Patient:
-    """Class representing a patient."""
-    
-    id_counter = 0  # Class variable to keep track of patient IDs
 
-    def __init__(self, name: str, medical_history: str):
-        """
-        Initialize a new Patient instance.
-        
-        :param name: Name of the patient.
-        :param medical_history: Medical history of the patient.
-        """
-        self.id = Patient.id_counter
-        Patient.id_counter += 1
-        self.name = name
-        self.medical_history = medical_history
-        self.treatment_notes = []
+class UI:
+    def __init__(self, application: Application) -> None:
+        self.application = application
 
-        
-class Appointment:
-    """Class representing an appointment."""
-    
-    def __init__(self, patient: Patient, time_slot: str):
-        """
-        Initialize a new Appointment instance.
-        
-        :param patient: The patient associated with the appointment.
-        :param time_slot: Time slot for the appointment.
-        """
-        self.patient = patient
-        self.time_slot = time_slot
-        self.date = self.get_date_from_time_slot(time_slot)
-        self.notes = []
+    def create_grid(self) -> None:
+        # Placeholder for creating HTML grid
+        pass
 
-    @staticmethod
-    def get_date_from_time_slot(time_slot: str) -> str:
-        """
-        Extract date from the time slot.
-        
-        :param time_slot: Time slot string.
-        :return: Date in string format (sample: '2023-10-01').
-        """
-        # Logic to extract date from time slot, e.g., '2023-10-01 09:00'
-        return time_slot.split(' ')[0]
+    def update_cell_display(self, row: int, col: int) -> None:
+        # Placeholder for updating cell display in the UI
+        pass
+
+    def show_modal(self, message: str) -> None:
+        # Placeholder for showing modal in the UI
+        pass

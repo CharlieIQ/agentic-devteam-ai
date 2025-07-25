@@ -1,25 +1,45 @@
 import React from 'react';
 
+// Centralized agent configuration - easy to modify!
+const TEAM_CONFIG = {
+    design: {
+        name: 'ChAIrlie',
+        role: '🎯 Technical Design Lead',
+        description: 'Creates detailed technical designs and system architecture. Loves diagrams and hates typos.'
+    },
+    backend_code: {
+        name: 'Jimmy Backend',
+        role: '⚙️ Backend Engineer', 
+        description: 'Implements robust server-side logic, APIs, and data structures. Tempermental, hates unit testing.'
+    },
+    frontend_code: {
+        name: 'Willy WebDev',
+        role: '🎨 Frontend Engineer',
+        description: 'Crafts beautiful user interfaces and seamless user experiences. Lives on coffee and centering divs.'
+    },
+    tests: {
+        name: 'Bug Zapper',
+        role: '🧪 QA Tester',
+        description: 'Ensures code quality through comprehensive testing strategies. Simply loves breaking things.'
+    }
+    // documentation: {
+    //     name: 'Doc Writer',
+    //     role: '📚 Documentation Specialist',
+    //     description: 'Creates clear and comprehensive project documentation'
+    // }
+};
+
 /**
- * This component displays an overview of the development team.
- * It lists the team members, their roles, and a brief description of their responsibilities.
+ * TeamOverview component displays information about the AI development team.
  * @returns {JSX.Element} The rendered component.
  */
 function TeamOverview() {
-    // Define the team members and their roles
-    const agents = [
-        { name: 'Engineering Lead', role: 'ChAIrlie 🧠', description: 'Masterful at planning, bad at Fortnite' },
-        { name: 'Backend Engineer', role: 'Jimmy Backend ⚙️', description: 'Writes the backend code with ChatGPT and takes credit for it' },
-        { name: 'Frontend Engineer', role: 'Wally WebDev 🥊', description: 'Centers <div> elements like a genie. Has a drinking problem.' },
-        { name: 'QA Engineer', role: 'Bug Zapper 🧪', description: 'Breaks things on purpose so you don\'t have to' }
-    ];
-
     return (
         <div className="section team-overview">
-            <h2>Meet the Team</h2>
+            <h2>Meet the Team!</h2>
             <div className="agents-grid">
-                {agents.map((agent, i) => (
-                    <div className="agent-card" key={i}>
+                {Object.entries(TEAM_CONFIG).map(([key, agent]) => (
+                    <div key={key} className="agent-card">
                         <div className="agent-role">{agent.role}</div>
                         <div className="agent-name">{agent.name}</div>
                         <div className="agent-description">{agent.description}</div>

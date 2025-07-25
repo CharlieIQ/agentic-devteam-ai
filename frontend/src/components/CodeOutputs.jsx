@@ -13,9 +13,26 @@ function CodeOutputs({ outputs, loading }) {
     const outputConfig = {
         design: { title: 'Technical Design', icon: '📐', agent: 'ChAIrlie' },
         backend_code: { title: 'Backend Code', icon: '⚙️', agent: 'Jimmy Backend' },
-        frontend_code: { title: 'Frontend Code', icon: '🎨', agent: 'Wally WebDev' },
-        tests: { title: 'Test Suite', icon: '🧪', agent: 'Bug Zapper' },
-        complete_result: { title: 'Complete Output', icon: '💻', agent: 'Engineering Team' }
+        frontend_code: { title: 'Frontend Code', icon: '🎨', agent: 'Willy WebDev' },
+        tests: { title: 'Test Suite', icon: '🧪', agent: 'Bug Zapper' }
+    };
+
+    /**
+     * This function is a helper to combine all outputs into a single string,
+     * excluding the 'complete_result' key.
+     * It formats each output with its title and agent name.
+     * @returns The combined output string.
+     */
+    const getCombinedOutput = () => {
+        if (!outputs || Object.keys(outputs).length === 0) return '';
+        
+        return Object.entries(outputs)
+            .filter(([key]) => key !== 'complete_result') // Skip complete_result
+            .map(([key, output]) => {
+                const config = outputConfig[key] || { title: key, agent: output.agent || 'Unknown' };
+                return `# ${config.title} (by ${config.agent})\n\n${output.output}\n\n---\n\n`;
+            })
+            .join('');
     };
 
     if (loading) {
@@ -41,11 +58,26 @@ function CodeOutputs({ outputs, loading }) {
         );
     }
 
+    // Filter out complete_result if it exists
+    const filteredOutputs = Object.fromEntries(
+        Object.entries(outputs).filter(([key]) => key !== 'complete_result')
+    );
+
     return (
         <div className="section">
             <h2>💻 Generated Code</h2>
             <div className="outputs-container">
-                {Object.entries(outputs).map(([key, output]) => {
+                {/* Combined output at the top */}
+                <AgentOutput
+                    key="combined"
+                    title="Complete Project Output"
+                    agent="Engineering Team"
+                    output={getCombinedOutput()}
+                    icon="📦"
+                />
+                
+                {/* Individual outputs */}
+                {Object.entries(filteredOutputs).map(([key, output]) => {
                     const config = outputConfig[key] || { title: key, icon: '📄', agent: output.agent || 'Unknown' };
                     return (
                         <AgentOutput
