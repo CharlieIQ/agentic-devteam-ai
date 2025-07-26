@@ -37,7 +37,7 @@ class CrewAIService:
     def generate_code(self, requirements: str) -> Dict[str, Any]:
         """Generate code using the engineering team."""
         if not self._crew_available:
-            raise RuntimeError('CrewAI not available. Please install with: pip install crewai[tools]')
+            raise RuntimeError('CrewAI not available. Please install with: pip install crewai')
         
         if not requirements or not requirements.strip():
             raise ValueError('No requirements provided')

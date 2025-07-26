@@ -105,7 +105,7 @@ backend/
    npm run dev
    ```
 
-5. **Open your browser:** Navigate to `http://localhost:5173`
+5. **Open your browser:** Navigate to `http://localhost:5173` (default port for Vite)
 
 ### Backend Setup
 
