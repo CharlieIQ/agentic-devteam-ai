@@ -12,8 +12,40 @@ from typing import Optional
 log_queue = queue.Queue()
 
 class CrewAILogCapture:
-    """Captures stdout/stderr to forward CrewAI agent logs to SSE."""
+    """
+    Captures stdout/stderr to forward CrewAI agent logs to SSE.
+    This class filters and processes log lines to only include relevant agent activity.
     
+    It removes ANSI escape codes, cursor movement codes, and filters based on
+    specific patterns to determine if a line is substantive agent activity.
+    
+    It also handles writing to the original stream while capturing logs.
+    The captured logs are sent to a global queue for streaming to clients.
+    This allows for real-time log streaming without cluttering the output with noise.
+    
+    Attributes:
+        original_stream: The original stdout or stderr stream being captured.
+        buffer: A StringIO buffer to temporarily hold log lines before processing.
+    Methods:
+        write(text: str) -> None: Write text to the original stream and process for log queue.
+        _clean_ansi_codes(text: str) -> str: Remove ANSI escape codes and clean up the text.
+        _is_agent_log(line: str) -> bool: Check if the log line is substantive agent activity.
+        flush() -> None: Flush the original stream.
+        isatty() -> bool: Check if the stream is interactive.
+        readable() -> bool: Check if the stream supports reading.
+        writable() -> bool: Check if the stream supports writing.
+        seekable() -> bool: Check if the stream supports seeking.
+        fileno() -> Optional[int]: Return file descriptor if available.
+        __getattr__(name: str): Delegate any other attributes to the original stream.
+    Usage:
+        To use this class, replace sys.stdout and sys.stderr with instances of CrewAILogCapture
+        during application startup. This will capture all logs written to stdout/stderr
+        and filter them according to the defined criteria.
+        The captured logs can then be accessed via the global log queue.
+        Example:
+            original_stdout, original_stderr = setup_crewai_log_capture()
+            # Now all logs written to stdout/stderr will be captured and processed.
+    """
     def __init__(self, original_stream):
         self.original_stream = original_stream
         self.buffer = io.StringIO()

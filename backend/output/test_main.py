@@ -1,84 +1,50 @@
 import unittest
-from main import Application, Cell, GameLogic
+from main import Application
 
-class TestCell(unittest.TestCase):
-
-    def test_initialize_cell(self):
-        cell = Cell(is_mine=True)
-        self.assertTrue(cell.is_mine)
-        self.assertFalse(cell.is_revealed)
-        self.assertFalse(cell.is_flagged)
-
-    def test_reveal_cell(self):
-        cell = Cell(is_mine=False)
-        cell.reveal()
-        self.assertTrue(cell.is_revealed)
-
-    def test_flag_cell(self):
-        cell = Cell(is_mine=False)
-        cell.flag()
-        self.assertTrue(cell.is_flagged)
-
-    def test_unflag_cell(self):
-        cell = Cell(is_mine=False)
-        cell.flag()
-        cell.unflag()
-        self.assertFalse(cell.is_flagged)
-
-
-class TestGameLogic(unittest.TestCase):
-
-    def setUp(self):
-        self.game_logic = GameLogic(grid_size=(3, 3), mine_count=1)
-
-    def test_generate_grid_size(self):
-        self.assertEqual(len(self.game_logic.grid), 3)
-        self.assertEqual(len(self.game_logic.grid[0]), 3)
-
-    def test_place_mines(self):
-        mine_count = sum(cell.is_mine for row in self.game_logic.grid for cell in row)
-        self.assertEqual(mine_count, 1)
-
-    def test_adjacent_mine_count(self):
-        self.assertTrue(hasattr(self.game_logic.grid[0][0], 'adjacent_mines'))
-
-    def test_is_safe_cell(self):
-        self.assertFalse(self.game_logic.is_safe_cell(0, 0))
-
-        
 class TestApplication(unittest.TestCase):
 
     def setUp(self):
-        self.app = Application(grid_size=(3, 3), mine_count=1)
+        self.app = Application()
 
-    def test_start_game(self):
-        self.app.start_game()
-        self.assertFalse(self.app.game_over)
-        self.assertFalse(self.app.won)
+    def test_add_task(self):
+        self.app.add_task("Finish homework by Friday")
+        self.assertEqual(len(self.app.tasks), 1)
+        self.assertEqual(self.app.tasks[0]['name'], "Finish homework")
+        self.assertEqual(self.app.tasks[0]['deadline'], "Friday")
 
-    def test_handle_left_click_reveal_mine(self):
-        self.app.start_game()
-        for row in range(3):
-            for col in range(3):
-                if self.app.logic.grid[row][col].is_mine:
-                    self.app.handle_left_click(row, col)
-                    self.assertTrue(self.app.game_over)
+    def test_parse_task_description(self):
+        task = self.app._parse_task_description("Read chapter 5 by Monday")
+        self.assertEqual(task['name'], "Read chapter 5")
+        self.assertEqual(task['deadline'], "Monday")
 
-    def test_handle_left_click_reveal_safe_cell(self):
-        self.app.start_game()
-        for row in range(3):
-            for col in range(3):
-                if not self.app.logic.grid[row][col].is_mine:
-                    self.app.handle_left_click(row, col)
-                    self.assertTrue(self.app.logic.grid[row][col].is_revealed)
+        task = self.app._parse_task_description("Just a random task")
+        self.assertEqual(task['name'], "Just a random task")
+        self.assertIsNone(task['deadline'])
 
-    def test_check_win(self):
-        self.app.start_game()
-        for row in range(3):
-            for col in range(3):
-                if not self.app.logic.grid[row][col].is_mine:
-                    self.app.logic.grid[row][col].reveal()
-        self.assertTrue(self.app.check_win())    
+    def test_suggest_schedule(self):
+        self.app.add_task("Read the book by Saturday")
+        self.app.add_task("Submit assignment by Friday")
+        schedule = self.app.suggest_schedule()
+
+        self.assertEqual(len(schedule), 2)
+        self.assertEqual(schedule[0]['task'], "Read the book")
+        self.assertEqual(schedule[1]['task'], "Submit assignment")
+
+    def test_track_productivity(self):
+        self.app.add_task("Task 1")
+        self.app.track_productivity()
+        self.assertIn("2023-", self.app.productivity_trends)
+
+    def test_update_task_progress(self):
+        self.app.add_task("Task 1")
+        self.app.update_task_progress("Task 1", "completed")
+        self.assertEqual(self.app.tasks[0]['status'], "completed")
+
+    def test_burnout_detection(self):
+        self.app.add_task("Task " + str(i) for i in range(6))
+        with self.assertLogs() as log:
+            self.app.check_burnout()
+        self.assertIn("You have a heavy workload. Consider taking a break!", log.output[0])
 
 if __name__ == '__main__':
     unittest.main()

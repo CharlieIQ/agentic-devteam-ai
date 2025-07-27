@@ -1,21 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AgentOutput from './AgentOutput';
+import { getTeamConfig } from '../services/api';
 
 /**
  * CodeOutputs component displays the generated code outputs from the AI agents.
+ * Now dynamically adapts to any number of agents!
  * @param {Object} param0 - The props object.
  * @param {Object} param0.outputs - The generated code outputs.
  * @param {boolean} param0.loading - The loading state.
  * @returns {JSX.Element} The rendered component.
  */
 function CodeOutputs({ outputs, loading }) {
-    // Configuration for different output types
-    const outputConfig = {
-        design: { title: 'Technical Design', icon: '📐', agent: 'ChAIrlie' },
-        backend_code: { title: 'Backend Code', icon: '⚙️', agent: 'Jimmy Backend' },
-        frontend_code: { title: 'Frontend Code', icon: '🎨', agent: 'Willy WebDev' },
-        tests: { title: 'Test Suite', icon: '🧪', agent: 'Bug Zapper' }
-    };
+    // State to hold the output configuration
+    const [outputConfig, setOutputConfig] = useState({});
+
+    // Fetch the output configuration from the backend on component mount
+    useEffect(() => {
+        // Fetch output configuration from backend
+        const fetchOutputConfig = async () => {
+            try {
+                const config = await getTeamConfig();
+                setOutputConfig(config);
+            } catch (err) {
+                console.warn('Could not fetch output config, using fallback:', err);
+                setOutputConfig(FALLBACK_OUTPUT_CONFIG);
+            }
+        };
+
+        fetchOutputConfig();
+    }, []);
 
     /**
      * This function is a helper to combine all outputs into a single string,
@@ -29,8 +42,12 @@ function CodeOutputs({ outputs, loading }) {
         return Object.entries(outputs)
             .filter(([key]) => key !== 'complete_result') // Skip complete_result
             .map(([key, output]) => {
-                const config = outputConfig[key] || { title: key, agent: output.agent || 'Unknown' };
-                return `# ${config.title} (by ${config.agent})\n\n${output.output}\n\n---\n\n`;
+                const config = outputConfig[key] || { 
+                    title: key, 
+                    name: output.agent || 'Unknown',
+                    icon: '📄'
+                };
+                return `# ${config.title} (by ${config.name})\n\n${output.output}\n\n---\n\n`;
             })
             .join('');
     };
@@ -65,7 +82,7 @@ function CodeOutputs({ outputs, loading }) {
 
     return (
         <div className="section">
-            <h2>💻 Generated Code</h2>
+            <h2>Generated Code</h2>
             <div className="outputs-container">
                 {/* Combined output at the top */}
                 <AgentOutput
@@ -76,14 +93,18 @@ function CodeOutputs({ outputs, loading }) {
                     icon="📦"
                 />
                 
-                {/* Individual outputs */}
+                {/* Individual outputs - now dynamically configured */}
                 {Object.entries(filteredOutputs).map(([key, output]) => {
-                    const config = outputConfig[key] || { title: key, icon: '📄', agent: output.agent || 'Unknown' };
+                    const config = outputConfig[key] || { 
+                        title: key, 
+                        icon: '📄', 
+                        name: output.agent || 'Unknown' 
+                    };
                     return (
                         <AgentOutput
                             key={key}
                             title={config.title}
-                            agent={config.agent}
+                            agent={config.name}
                             output={output.output}
                             icon={config.icon}
                         />
@@ -93,5 +114,13 @@ function CodeOutputs({ outputs, loading }) {
         </div>
     );
 }
+
+// Fallback configuration
+const FALLBACK_OUTPUT_CONFIG = {
+    design: { title: 'Technical Design', icon: '📐', name: 'ChAIrlie' },
+    backend_code: { title: 'Backend Code', icon: '⚙️', name: 'Jimmy Backend' },
+    frontend_code: { title: 'Frontend Code', icon: '🎨', name: 'Willy WebDev' },
+    tests: { title: 'Test Suite', icon: '🧪', name: 'Bug Zapper' }
+};
 
 export default CodeOutputs;

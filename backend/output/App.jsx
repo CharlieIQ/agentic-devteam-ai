@@ -1,89 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import './styles.css';
+import axios from 'axios';
 
-const Cell = ({ cell, onLeftClick, onRightClick }) => {
-    return (
-        <div
-            className={`cell ${cell.is_revealed ? (cell.is_mine ? 'mine' : '') : (cell.is_flagged ? 'flagged' : '')}`}
-            onClick={onLeftClick}
-            onContextMenu={onRightClick}
-        >
-            {cell.is_revealed && !cell.is_mine ? (cell.adjacent_mines > 0 ? cell.adjacent_mines : '') : ''}
-        </div>
-    );
-};
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [taskDescription, setTaskDescription] = useState('');
+  const [suggestedSchedule, setSuggestedSchedule] = useState([]);
+  const [loadBurnoutMessage, setLoadBurnoutMessage] = useState('');
 
-const Minesweeper = () => {
-    const [grid, setGrid] = useState([]);
-    const [gameOver, setGameOver] = useState(false);
-    const [won, setWon] = useState(false);
-    
-    const gridSize = { rows: 9, cols: 9 };
-    const mineCount = 10;
+  useEffect(() => {
+    async function fetchSuggestedSchedule() {
+      const response = await axios.get('/suggest_schedule');
+      setSuggestedSchedule(response.data);
+    }
+    fetchSuggestedSchedule();
+  }, [tasks]);
 
-    useEffect(() => {
-        startGame();
-    }, []);
+  useEffect(() => {
+    async function checkBurnout() {
+      const response = await axios.get('/check_burnout');
+      setLoadBurnoutMessage(response.data.message);
+    }
+    checkBurnout();
+  }, [tasks]);
+  
+  const addTask = async () => {
+    await axios.post('/add_task', { description: taskDescription });
+    setTasks([...tasks, { name: taskDescription, status: 'in progress' }]);
+    setTaskDescription('');
+  };
 
-    const startGame = () => {
-        // Call backend to initialize the game
-        fetch('/api/start-game', { method: 'POST', body: JSON.stringify({ gridSize, mineCount }), headers: { 'Content-Type': 'application/json' } })
-            .then(response => response.json())
-            .then(data => setGrid(data.grid));
-        setGameOver(false);
-        setWon(false);
-    };
+  return (
+    <div>
+      <h1>Intelligent Student Planner</h1>
+      <input
+        type="text"
+        value={taskDescription}
+        onChange={(e) => setTaskDescription(e.target.value)}
+        placeholder="Add a task (e.g., 'Finish comp sci paper by Friday')"
+      />
+      <button onClick={addTask}>Add Task</button>
+      <h2>Current Tasks</h2>
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>{task.name} - {task.status}</li>
+        ))}
+      </ul>
+      <h2>Suggested Schedule</h2>
+      <ul>
+        {suggestedSchedule.map((schedule, index) => (
+          <li key={index}>{schedule.task} at {schedule.scheduled_time}</li>
+        ))}
+      </ul>
+      {loadBurnoutMessage && <div>{loadBurnoutMessage}</div>}
+    </div>
+  );
+}
 
-    const handleLeftClick = (row, col) => {
-        if (gameOver || grid[row][col].is_revealed) return;
-        // Call backend to reveal cell
-        fetch(`/api/reveal-cell?row=${row}&col=${col}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                setGrid(data.grid);
-                setGameOver(data.game_over);
-                setWon(data.has_won);
-            });
-    };
-
-    const handleRightClick = (row, col) => {
-        if (gameOver || grid[row][col].is_revealed) return;
-        // Call backend to flag/unflag cell
-        fetch(`/api/flag-cell?row=${row}&col=${col}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => setGrid(data.grid));
-    };
-
-    const restartGame = () => startGame();
-
-    const showEndDialog = () => {
-        const message = won ? "Congratulations! You win!" : "You hit a mine! Game Over!";
-        alert(message);
-        restartGame();
-    };
-
-    return (
-        <div className="minesweeper">
-            <h1>Minesweeper</h1>
-            <div className="grid">
-                {grid.map((row, rowIndex) => (
-                    <div key={rowIndex} className="row">
-                        {row.map((cell, colIndex) => (
-                            <Cell
-                                key={colIndex}
-                                cell={cell}
-                                onLeftClick={() => handleLeftClick(rowIndex, colIndex)}
-                                onRightClick={(e) => { e.preventDefault(); handleRightClick(rowIndex, colIndex); }}
-                            />
-                        ))}
-                    </div>
-                ))}
-            </div>
-            <button onClick={restartGame}>Restart</button>
-            {gameOver && showEndDialog()}
-        </div>
-    );
-};
-
-ReactDOM.render(<Minesweeper />, document.getElementById('root'));
+const rootElement = document.getElementById('root');
+ReactDOM.render(<App />, rootElement);

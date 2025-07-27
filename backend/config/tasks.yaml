@@ -49,3 +49,49 @@ test_task:
   context:
     - code_task
   output_file: output/test_{module_name}
+
+# NEW TASKS - These are created dynamically when agents are enabled
+documentation_task:
+  description: >
+    Write comprehensive documentation for the project including a README.md with setup instructions, API documentation, and usage examples.
+    Include the requirements: {requirements}
+  expected_output: >
+    A comprehensive README.md file with setup instructions, API documentation, and usage examples.
+  agent: documentation_engineer
+  context:
+    - code_task
+    - frontend_task
+  output_file: output/README.md
+
+security_audit_task:
+  description: >
+    Analyze the backend code for security vulnerabilities including input validation, authentication, authorization, and data handling. Provide specific recommendations.
+  expected_output: >
+    A detailed security audit report with identified vulnerabilities and specific recommendations for improvement.
+  agent: security_engineer
+  context:
+    - code_task
+  output_file: output/security_report.md
+
+performance_task:
+  description: >
+    Review the backend code for performance issues including algorithmic complexity, database queries, memory usage, and suggest specific optimizations.
+  expected_output: >
+    A performance analysis report with identified bottlenecks and specific optimization recommendations.
+  agent: performance_engineer
+  context:
+    - code_task
+  output_file: output/performance_report.md
+
+deployment_task:
+  description: >
+    Create deployment scripts, Docker configuration, and CI/CD pipeline setup for the application. Include environment setup and production deployment steps.
+  expected_output: >
+    Deployment scripts and configuration files ready for production deployment.
+    IMPORTANT: Output ONLY the raw code without any markdown formatting, code block delimiters, or backticks.
+  agent: devops_engineer
+  context:
+    - code_task
+    - frontend_task
+    - test_task
+  output_file: output/deploy.sh

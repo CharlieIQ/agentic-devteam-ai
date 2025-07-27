@@ -10,8 +10,19 @@ generate_bp = Blueprint('generate', __name__)
 
 @generate_bp.route('/generate', methods=['POST'])
 def generate_code():
-    """Generate code using CrewAI."""
+    """
+    This endpoint generates code based on provided requirements.
+    It first checks if CrewAI is available, then validates the requirements.
+    If requirements are not provided in the request, it retrieves them from storage.
+    If no requirements are found, it returns an error.
+    
+    Returns:
+        JSON response with the generated code or an error message.
+        500 if CrewAI is not available, 400 if no requirements are provided.
+        200 with the generated code on success.
+    """
     try:
+        # Check if CrewAI service is available
         if not crewai_service.is_available:
             error_msg = 'CrewAI not available. Please install with: pip install crewai[tools]'
             print(f"❌ {error_msg}")

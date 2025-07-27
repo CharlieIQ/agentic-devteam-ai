@@ -28,6 +28,10 @@ My system employs four specialized AI agents working in harmony:
 - **Frontend Engineer**: Develops React-based user interfaces following design specifications
 - **Backend Engineer**: Implements Python backend logic with proper class structures and methods
 - **QA Engineer**: Creates comprehensive unit tests to ensure code quality and functionality
+- **DevOps Engineer**: Configures deployment pipelines and infrastructure as code
+- **Documentation Specialist**: Generates detailed design and API documentation
+- **Security Auditor**: Reviews code for security vulnerabilities and compliance with best practices
+- **Performance Optimizer**: Analyzes code for performance bottlenecks and suggests improvements
 
 Each agent is powered by GPT-4o-mini and configured with specific roles, goals, and backstories for optimal performance.
 ## Project Structure
@@ -43,6 +47,8 @@ frontend/
 │   │   ├── LiveLogs.jsx         # Real-time logging display
 │   │   ├── RequirementsForm.jsx # User input form for requirements
 │   │   └── TeamOverview.jsx     # Agent status and overview
+│   ├── services/           # API service for backend communication
+│   │   ├── api.js                # Handles API requests and responses
 │   ├── styles/            # Component-specific CSS files
 │   ├── App.jsx            # Main application component
 │   └── main.jsx           # React application entry point
@@ -61,7 +67,8 @@ backend/
 │   │   ├── generate.py         # Main generation endpoint
 │   │   ├── health.py           # Health check endpoint
 │   │   ├── logs.py             # Logging endpoints
-│   │   └── requirements.py     # Requirements management
+│   │   ├── requirements.py     # Requirements management
+│   │   └── team.py             # AI Team management and status
 │   ├── services/               # Business logic services
 │   │   ├── crewai_service.py   # CrewAI integration service
 │   │   └── requirements_service.py # Requirements processing

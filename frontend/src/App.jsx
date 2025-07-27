@@ -4,6 +4,8 @@ import RequirementsForm from './components/RequirementsForm';
 import TeamOverview from './components/TeamOverview';
 import CodeOutputs from './components/CodeOutputs';
 import LiveLogs from './components/LiveLogs';
+// Import API service methods
+import { generateCode as apiGenerateCode } from './services/api';
 import './App.css';
 
 /**
@@ -33,16 +35,10 @@ function App() {
     // Reset outputs and set loading state
     setLoading(true);
     setOutputs({});
-    // Send requirements to the backend for code generation
+    
     try {
-      // Send requirements in the generate request as well as a backup
-      const res = await fetch('http://localhost:5001/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requirements })
-      });
-      // Parse the JSON response
-      const data = await res.json();
+      const data = await apiGenerateCode(requirements);
+      
       // Check if the response is successful
       if (data.status === 'success') {
         setOutputs(data.outputs || {});

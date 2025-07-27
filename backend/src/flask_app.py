@@ -12,6 +12,7 @@ from .routes.logs import logs_bp
 from .routes.requirements import requirements_bp
 from .routes.generate import generate_bp
 from .routes.health import health_bp
+from .routes.team import team_bp
 
 def create_app() -> Flask:
     """Create and configure the Flask application."""
@@ -35,6 +36,7 @@ def create_app() -> Flask:
     app.register_blueprint(requirements_bp)
     app.register_blueprint(generate_bp)
     app.register_blueprint(health_bp)
+    app.register_blueprint(team_bp)
     
     return app
 
@@ -43,7 +45,7 @@ def run_app() -> None:
     from .services.crewai_service import crewai_service
     
     if not crewai_service.is_available:
-        print("⚠️  CrewAI is not installed. Please run: pip install crewai[tools]")
+        print("⚠️  CrewAI is not installed. Please run: pip install crewai")
     
     print(f"🚀 Starting Flask app on {Config.HOST}:{Config.PORT}...")
     

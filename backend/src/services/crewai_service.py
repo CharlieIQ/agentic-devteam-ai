@@ -8,7 +8,24 @@ import traceback
 from ..config import Config
 
 class CrewAIService:
-    """Service for managing CrewAI operations."""
+    """
+    Service for managing CrewAI operations.
+    
+    This service provides functionality to generate code based on user requirements
+    using the CrewAI engineering team. It initializes the CrewAI modules and provides
+    methods to generate code, extract outputs, and check availability.
+    
+    Attributes:
+        _crew_available: A boolean indicating if CrewAI is available.
+        _engineering_team: The CrewAI engineering team class.
+    Methods:
+        is_available() -> bool: Check if CrewAI is available.
+        generate_code(requirements: str) -> Dict[str, Any]: Generate code based on requirements
+        _extract_outputs(result) -> Dict[str, Dict[str, str]]: Extract structured outputs from CrewAI result.
+    Usage:
+        This service can be used to generate code based on user requirements in applications
+        where automated code generation is needed, such as in development tools or AI-assisted coding environments.        
+    """
     
     def __init__(self):
         self._crew_available = False
@@ -91,6 +108,8 @@ class CrewAIService:
             print(f"📊 Found {len(result.tasks_output)} task outputs")
             
             for i, task_output in enumerate(result.tasks_output):
+                print(f"🔍 Processing task {i+1}: {type(task_output)}")
+                
                 # Use config to determine task name and agent info
                 task_key = task_order[i] if i < len(task_order) else f'task_{i}'
                 config = agent_config.get(task_key, {})
@@ -98,12 +117,23 @@ class CrewAIService:
                 
                 # Try to get agent name from task output if not in config
                 if agent_name == 'Unknown':
-                    if hasattr(task_output, 'agent'):
-                        agent_name = str(task_output.agent)
-                    elif hasattr(task_output, 'task') and hasattr(task_output.task, 'agent'):
-                        agent_name = str(task_output.task.agent.role)
+                    try:
+                        if hasattr(task_output, 'agent') and task_output.agent:
+                            agent_name = str(task_output.agent)
+                        elif (hasattr(task_output, 'task') and 
+                              hasattr(task_output.task, 'agent') and 
+                              task_output.task.agent and
+                              hasattr(task_output.task.agent, 'role')):
+                            agent_name = str(task_output.task.agent.role)
+                    except (AttributeError, TypeError) as e:
+                        print(f"⚠️ Could not extract agent name from task output: {e}")
+                        agent_name = f'Agent_{i+1}'
                 
-                output_text = str(task_output.raw if hasattr(task_output, 'raw') else task_output)
+                try:
+                    output_text = str(task_output.raw if hasattr(task_output, 'raw') else task_output)
+                except (AttributeError, TypeError) as e:
+                    print(f"⚠️ Could not extract output text from task: {e}")
+                    output_text = f"Error extracting output from {agent_name}"
                 
                 outputs[task_key] = {
                     'agent': agent_name,

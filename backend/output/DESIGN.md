@@ -1,144 +1,197 @@
-```markdown
-# Minesweeper Game - Detailed Design
+```python
+# main.py
 
-## Module: `main.py`
+class Application:
+    """
+    The Application class represents the student planner app, managing 
+    assignments, deadlines, schedules, and providing suggestions for 
+    productivity and well-being.
+    """
 
-### Class: Application
-The main class responsible for managing the game state, rendering the UI, and handling user interactions.
+    def __init__(self):
+        """
+        Initializes the Application, setting up necessary components
+        such as data storage for tasks, deadlines, productivity trends,
+        and integration clients (e.g., Google Calendar, Moodle).
+        """
+        self.tasks = []
+        self.deadlines = []
+        self.productivity_trends = {}
+        self.calendar_integration = CalendarIntegration()
+        self.pdf_parser = PDFParser()
+        self.learning_platform_integration = LearningPlatformIntegration()
+        self.focus_mode = FocusMode()
+        self.ai_coach = AICoach()
+        self.burnout_detector = BurnoutDetector()
 
-#### Methods:
-- `__init__(self, grid_size: Tuple[int, int], mine_count: int) -> None`
-  - Initializes the game with a grid of specified size and mine count.
-  - Parameters:
-    - `grid_size` - A tuple representing the dimensions of the grid (rows, columns).
-    - `mine_count` - Integer representing the total number of mines on the board.
+    def add_task(self, task_description: str):
+        """
+        Adds a new task to the planner using natural language input.
 
-- `start_game(self) -> None`
-  - Sets up the game, initializes the board, and places mines.
+        :param task_description: A natural language string describing the task.
+        """
+        task = self._parse_task_description(task_description)
+        self.tasks.append(task)
 
-- `render(self) -> None`
-  - Renders the game UI in the web browser, creating an interactive grid layout.
+    def _parse_task_description(self, description: str) -> dict:
+        """
+        Parses the task description to extract important details such as
+        task name, deadline, etc.
 
-- `handle_left_click(self, row: int, col: int) -> None`
-  - Handles the logic when a cell is left-clicked, revealing a cell or triggering a reveal.
-  - Parameters:
-    - `row` - Row index of the cell clicked.
-    - `col` - Column index of the cell clicked.
+        :param description: The natural language description of the task.
+        :return: A dictionary representing the task.
+        """
+        # Implementation to parse the task description
+        # Example output: {"name": "Finish comp sci paper", "deadline": "Friday"}
+        pass
 
-- `handle_right_click(self, row: int, col: int) -> None`
-  - Handles the logic when a cell is right-clicked, flagging or unflagging a mine.
-  - Parameters:
-    - `row` - Row index of the cell clicked.
-    - `col` - Column index of the cell clicked.
+    def suggest_schedule(self):
+        """
+        Uses AI to generate a daily study schedule based on current tasks,
+        past productivity trends, and deadlines.
+        """
+        # Implementation for suggesting a schedule
+        pass
 
-- `recursive_reveal(self, row: int, col: int) -> None`
-  - Reveals the cell at (row, col) and recursively reveals all adjacent cells if the cell is empty.
+    def track_productivity(self):
+        """
+        Tracks the user's productivity and updates the trends.
+        May include data aggregation and analysis.
+        """
+        pass
 
-- `check_win(self) -> bool`
-  - Checks whether the player has won (all non-mine cells revealed).
-  - Returns:
-    - True if the player has won, False otherwise.
+    def enable_focus_mode(self):
+        """
+        Activates the focus mode which includes Pomodoro timers and
+        motivational nudges to enhance studying efficiency.
+        """
+        self.focus_mode.start_pomodoro()
 
-- `check_loss(self) -> bool`
-  - Checks whether the player has lost (clicked on a mine).
-  - Returns:
-    - True if the player has lost, False otherwise.
+    def update_task_progress(self, task_name: str, status: str):
+        """
+        Updates the progress of a specific task based on the user's input.
 
-- `show_end_dialog(self, message: str) -> None`
-  - Displays a modal dialog with the game's outcome message (win or loss).
+        :param task_name: Name of the task being updated.
+        :param status: Current status of the task (e.g., 'completed', 'in progress').
+        """
+        # Implementation for updating task progress.
+        pass
 
-- `restart_game(self) -> None`
-  - Resets the game without changing the selected difficulty settings.
+    def check_burnout(self):
+        """
+        Utilizes the burnout detector to analyze current workload 
+        and provide recommendations for breaks or relaxations.
+        """
+        self.burnout_detector.analyze_workload(self.tasks)
 
-### Class: GameLogic
-Handles all game logic related to the Minesweeper game such as grid setup, mine placement, and victory/loss conditions.
+class CalendarIntegration:
+    """
+    Handles the interaction with Google Calendar to sync events and deadlines.
+    """
+    
+    def sync_events(self):
+        """
+        Syncs events from Google Calendar to the application.
+        """
+        pass
 
-#### Methods:
-- `__init__(self, grid_size: Tuple[int, int], mine_count: int) -> None`
-  - Initializes the game logic with grid size and mine count.
+    def add_event(self, event_data: dict):
+        """
+        Adds a new event to Google Calendar based on task information.
 
-- `generate_grid(self) -> List[List[Cell]]`
-  - Generates a grid of the specified size and initializes cells.
+        :param event_data: A dictionary containing event details.
+        """
+        pass
 
-- `place_mines(self) -> None`
-  - Randomly places mines over the grid based on the mine count.
+class PDFParser:
+    """
+    Parses PDF syllabi to extract course deadlines and required assignments.
+    """
 
-- `count_adjacent_mines(self) -> None`
-  - Updates the cell count for adjacent mines for each cell after mines are placed.
+    def parse_syllabus(self, pdf_file_path: str):
+        """
+        Extracts deadlines and assignments from a PDF syllabus.
 
-- `is_safe_cell(self, row: int, col: int) -> bool`
-  - Checks if a cell is safe to click (i.e., it does not contain a mine).
+        :param pdf_file_path: File path of the PDF syllabus.
+        """
+        pass
 
-### Class: Cell
-Represents a single cell in the Minesweeper grid.
+class LearningPlatformIntegration:
+    """
+    Integrates with learning platforms like Moodle or Brightspace to
+    fetch course-related data.
+    """
 
-#### Methods:
-- `__init__(self, is_mine: bool) -> None`
-  - Initializes the Cell.
-  - Parameters:
-    - `is_mine` - Boolean indicating if the cell is a mine.
+    def fetch_assignments(self):
+        """
+        Fetches assignments from the learning platform.
+        """
+        pass
 
-- `reveal(self) -> None`
-  - Reveals the cell.
+class FocusMode:
+    """
+    Implements focus mode features like Pomodoro timers and task breakdowns.
+    """
 
-- `flag(self) -> None`
-  - Flags the cell as a mine.
+    def start_pomodoro(self):
+        """
+        Starts a Pomodoro timer for the focus session.
+        """
+        pass
 
-- `unflag(self) -> None`
-  - Unflags the cell.
+    def send_motivational_nudge(self):
+        """
+        Sends a motivational nudge during study sessions.
+        """
+        pass
 
-- `is_revealed(self) -> bool`
-  - Returns whether the cell is revealed.
+class AICoach:
+    """
+    Provides AI-driven coaching to adjust study plans based on progress.
+    """
 
-- `is_flagged(self) -> bool`
-  - Returns whether the cell is flagged.
+    def adjust_plan(self, tasks: list):
+        """
+        Adjusts the study plans if the user falls behind.
 
-### Class: UI
-Handles the user interface rendering and interactions.
+        :param tasks: Current list of tasks with their status.
+        """
+        pass
 
-#### Methods:
-- `__init__(self, application: Application) -> None`
-  - Initializes the UI with a reference to the Application.
+class BurnoutDetector:
+    """
+    Monitors user workload to detect signs of burnout.
+    """
 
-- `create_grid(self) -> None`
-  - Creates the HTML elements for the grid of cells.
+    def analyze_workload(self, tasks: list):
+        """
+        Analyzes the workload from the tasks and suggests breaks or activities.
 
-- `update_cell_display(self, row: int, col: int) -> None`
-  - Updates the visual representation of a cell based on its state (revealed, mine, flagged).
-
-- `show_modal(self, message: str) -> None`
-  - Displays a modal window with a given message.
+        :param tasks: List of current tasks.
+        """
+        pass
+```
 
 ### Steps for Implementation:
-1. **Setup the Environment**
-   - Set up a Python environment and install any necessary web frameworks (such as Flask or Django).
 
-2. **Create `main.py` File**
-   - Start the development of the `main.py` module.
+1. **Set Up Environment**: 
+   - Create a new Python environment and install necessary libraries (e.g., Google API for Calendar, NLP libraries for natural language processing).
 
-3. **Implement Application Class**
-   - Implement the class to manage game state and rendering.
-   - Create methods for starting the game, handling user input, and checking for win/loss conditions.
+2. **Module Structure**: 
+   - Create a file named `main.py` and implement the structure as described above.
 
-4. **Implement GameLogic Class**
-   - Create logic for generating a grid of cells and placing mines.
-   - Implement methods for counting adjacent mines and exposing cells recursively.
+3. **Implement Classes**: 
+   - Code the functionality for each class, ensuring to define the methods as outlined.
+   - Use external libraries where appropriate for tasks like PDF parsing and Google Calendar integration.
 
-5. **Implement Cell Class**
-   - Structure the `Cell` class to track whether a cell is a mine, revealed, or flagged.
+4. **Testing**: 
+   - Implement unit tests to verify the behavior of methods, especially for task parsing and integration functionalities.
 
-6. **Implement UI Class**
-   - Create the UI to visually represent the minesweeper game, create interactive elements, and manage user interactions via clicks.
+5. **User Interface**: 
+   - Once the backend is stable, either create a simple command-line interface or a basic web front-end to interact with the Application class.
 
-7. **Connect Classes**
-   - Ensure the `Application` class appropriately communicates with the `GameLogic`, `Cell`, and `UI` classes.
+6. **Final Integration and Debugging**: 
+   - Link all components together, ensuring data flows correctly through the application and is properly managed.
 
-8. **Include Unit Tests**
-   - Write unit tests for each class to validate the logic for grid generation, mine placement, and game state checks.
-
-9. **Testing**
-   - Thoroughly test the gameplay mechanics and responses to user inputs. Fix any bugs that arise during testing.
-
-10. **Deployment**
-    - Prepare for deployment or further integration with a web interface.
-```
+7. **Documentation**: 
+   - Write additional documentation as necessary to help future developers understand and work with the codebase.

@@ -1,4 +1,5 @@
 import React from 'react';
+import { saveRequirements } from '../services/api';
 
 /**
  * RequirementsForm component allows users to input and save product requirements.
@@ -8,6 +9,16 @@ import React from 'react';
  * @returns {JSX.Element} The rendered component.
  */
 function RequirementsForm({ requirements, setRequirements }) {
+    const handleSaveRequirements = async () => {
+        try {
+            await saveRequirements(requirements);
+            alert('Requirements saved!');
+        } catch (error) {
+            console.error('Failed to save requirements:', error);
+            alert('Failed to save requirements. Please try again.');
+        }
+    };
+
     return (
         <div className="section requirements">
             <h2>📋 Product Requirements</h2>
@@ -19,14 +30,9 @@ function RequirementsForm({ requirements, setRequirements }) {
 
 Example: Create a task management system with the ability to create, read, update, and delete tasks. Each task should have a title, description, due date, and status."
             />
-            <button type="button" onClick={async () => {
-                await fetch('http://localhost:5001/requirements', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ requirements })
-                });
-                alert('Requirements saved!');
-            }}>💾 Save Requirements</button>
+            <button type="button" onClick={handleSaveRequirements}>
+                💾 Save Requirements
+            </button>
         </div>
     );
 }
