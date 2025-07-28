@@ -119,7 +119,7 @@ class Config:
             'title': 'Documentation',
             'icon': '📚',
             'role': 'documentation_engineer',
-            'description': 'Creates comprehensive project documentation. Obsessed with README files.',
+            'description': 'Creates comprehensive project documentation. Memorized the Miriam Webster dictionary.',
             'llm': 'openai/gpt-4o-mini',
             'enabled': True,  # Set to True to activate
             'dependencies': ['backend_code', 'frontend_code'],
@@ -145,8 +145,8 @@ class Config:
             'expected_output': "A detailed security audit report with identified vulnerabilities and specific recommendations for improvement."
         },
         'performance_optimizer': {
-            'name': 'Speedy Gonzales',
-            'title': 'Performance Optimization',
+            'name': 'Speedy Steve',
+            'title': 'Optimizer',
             'icon': '⚡',
             'role': 'performance_engineer',
             'description': 'Optimizes code for speed and efficiency. Hates slow queries.',
@@ -161,7 +161,7 @@ class Config:
         },
         'deployment': {
             'name': 'Deploy Dan',
-            'title': 'Deployment & DevOps',
+            'title': 'DevOps',
             'icon': '🚀',
             'role': 'devops_engineer',
             'description': 'Creates deployment scripts and CI/CD pipelines. Lives in the cloud.',

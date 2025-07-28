@@ -6,6 +6,8 @@ import CodeOutputs from './components/CodeOutputs';
 import LiveLogs from './components/LiveLogs';
 // Import API service methods
 import { generateCode as apiGenerateCode } from './services/api';
+// Import modern icons
+import { Sparkles, Zap, Clock } from 'lucide-react';
 import './App.css';
 
 /**
@@ -56,8 +58,13 @@ function App() {
   return (
     <div className="container">
       <header className="app-header">
-        <h1>Charlie's AI Development Team</h1>
-        <p className="app-subtitle">Let my state of the art AI development team build your project</p>
+        <div className="header-content">
+          <div className="logo-section">
+            <Sparkles className="logo-icon" />
+            <h1>Charlie's AI Development Team</h1>
+          </div>
+          <p className="app-subtitle">Let my state of the art AI development team build your project</p>
+        </div>
       </header>
 
       <div className="main-content">
@@ -70,7 +77,17 @@ function App() {
             onClick={generateCode}
             disabled={loading || !requirements.trim()}
           >
-            {loading ? '⏳ Generating...' : '🎯 Generate Code'}
+            {loading ? (
+              <>
+                <Clock className="btn-icon" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Zap className="btn-icon" />
+                Generate Code
+              </>
+            )}
           </button>
         </div>
         

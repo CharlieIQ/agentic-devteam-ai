@@ -4,47 +4,57 @@ from main import Application
 class TestApplication(unittest.TestCase):
 
     def setUp(self):
+        """Set up the test case with a new Application instance."""
         self.app = Application()
 
-    def test_add_task(self):
-        self.app.add_task("Finish homework by Friday")
-        self.assertEqual(len(self.app.tasks), 1)
-        self.assertEqual(self.app.tasks[0]['name'], "Finish homework")
-        self.assertEqual(self.app.tasks[0]['deadline'], "Friday")
+    def test_check_in(self):
+        """Test checking in a patient."""
+        patient = self.app.check_in("John Doe", 30, "Flu symptoms")
+        self.assertEqual(patient['name'], "John Doe")
+        self.assertEqual(patient['age'], 30)
+        self.assertEqual(patient['symptoms'], "Flu symptoms")
+        self.assertEqual(patient['status'], "Checked In")
+        self.assertEqual(patient['id'], 1)
 
-    def test_parse_task_description(self):
-        task = self.app._parse_task_description("Read chapter 5 by Monday")
-        self.assertEqual(task['name'], "Read chapter 5")
-        self.assertEqual(task['deadline'], "Monday")
+    def test_get_patient_info(self):
+        """Test retrieving patient information."""
+        self.app.check_in("Jane Doe", 25, "Cold symptoms")
+        patient_info = self.app.get_patient_info(1)
+        self.assertEqual(patient_info['name'], "Jane Doe")
+        self.assertEqual(patient_info['age'], 25)
 
-        task = self.app._parse_task_description("Just a random task")
-        self.assertEqual(task['name'], "Just a random task")
-        self.assertIsNone(task['deadline'])
+    def test_check_out(self):
+        """Test checking out a patient."""
+        self.app.check_in("John Smith", 45, "Headache")
+        checkout_message = self.app.check_out(1)
+        self.assertEqual(checkout_message['message'], "Patient checked out successfully")
+        self.assertEqual(checkout_message['patient_info']['status'], "Checked Out")
+    
+    def test_check_out_nonexistent_patient(self):
+        """Test checking out a non-existent patient."""
+        checkout_message = self.app.check_out(99)
+        self.assertEqual(checkout_message['message'], "Patient not found")
 
-    def test_suggest_schedule(self):
-        self.app.add_task("Read the book by Saturday")
-        self.app.add_task("Submit assignment by Friday")
-        schedule = self.app.suggest_schedule()
+    def test_list_patients(self):
+        """Test listing patients."""
+        self.app.check_in("Alice", 28, "Fever")
+        self.app.check_in("Bob", 34, "Broken leg")
+        self.app.check_out(1)  # Check out Alice
+        patients = self.app.list_patients()
+        self.assertEqual(len(patients), 1)
+        self.assertEqual(patients[0]['name'], "Bob")
 
-        self.assertEqual(len(schedule), 2)
-        self.assertEqual(schedule[0]['task'], "Read the book")
-        self.assertEqual(schedule[1]['task'], "Submit assignment")
+    def test_update_symptoms(self):
+        """Test updating patient symptoms."""
+        self.app.check_in("Carlos", 22, "Nausea")
+        update_response = self.app.update_symptoms(1, "Severe Nausea")
+        self.assertEqual(update_response['message'], "Symptoms updated")
+        self.assertEqual(update_response['patient_info']['symptoms'], "Severe Nausea")
 
-    def test_track_productivity(self):
-        self.app.add_task("Task 1")
-        self.app.track_productivity()
-        self.assertIn("2023-", self.app.productivity_trends)
+    def test_update_symptoms_nonexistent_patient(self):
+        """Test updating symptoms for a non-existent patient."""
+        update_response = self.app.update_symptoms(99, "Nausea")
+        self.assertEqual(update_response['message'], "Patient not found")
 
-    def test_update_task_progress(self):
-        self.app.add_task("Task 1")
-        self.app.update_task_progress("Task 1", "completed")
-        self.assertEqual(self.app.tasks[0]['status'], "completed")
-
-    def test_burnout_detection(self):
-        self.app.add_task("Task " + str(i) for i in range(6))
-        with self.assertLogs() as log:
-            self.app.check_burnout()
-        self.assertIn("You have a heavy workload. Consider taking a break!", log.output[0])
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

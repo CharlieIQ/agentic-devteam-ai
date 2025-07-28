@@ -111,7 +111,7 @@ class CrewAIService:
                 print(f"🔍 Processing task {i+1}: {type(task_output)}")
                 
                 # Use config to determine task name and agent info
-                task_key = task_order[i] if i < len(task_order) else f'task_{i}'
+                task_key = task_order[i] if i < len(task_order) else f'task_{i+1}'
                 config = agent_config.get(task_key, {})
                 agent_name = config.get('name', 'Unknown')
                 
@@ -129,19 +129,54 @@ class CrewAIService:
                         print(f"⚠️ Could not extract agent name from task output: {e}")
                         agent_name = f'Agent_{i+1}'
                 
+                # Try multiple ways to extract output text
+                output_text = ""
                 try:
-                    output_text = str(task_output.raw if hasattr(task_output, 'raw') else task_output)
+                    # Try different attributes that might contain the output
+                    if hasattr(task_output, 'raw') and task_output.raw:
+                        output_text = str(task_output.raw)
+                    elif hasattr(task_output, 'result') and task_output.result:
+                        output_text = str(task_output.result)
+                    elif hasattr(task_output, 'output') and task_output.output:
+                        output_text = str(task_output.output)
+                    elif hasattr(task_output, 'content') and task_output.content:
+                        output_text = str(task_output.content)
+                    else:
+                        # Fallback to string representation
+                        output_text = str(task_output)
+                        
+                    # Clean up the output text
+                    if output_text:
+                        # Remove common prefixes that might be added by CrewAI
+                        output_text = output_text.strip()
+                        if output_text.startswith('Output:'):
+                            output_text = output_text[7:].strip()
+                        if output_text.startswith('Result:'):
+                            output_text = output_text[7:].strip()
+                            
                 except (AttributeError, TypeError) as e:
                     print(f"⚠️ Could not extract output text from task: {e}")
                     output_text = f"Error extracting output from {agent_name}"
                 
-                outputs[task_key] = {
-                    'agent': agent_name,
-                    'output': output_text
-                }
-                print(f"✅ Task {i+1} ({task_key}): {len(output_text)} characters from {agent_name}")
+                # Only add to outputs if we have meaningful content
+                if output_text and len(output_text.strip()) > 10:
+                    outputs[task_key] = {
+                        'agent': agent_name,
+                        'output': output_text
+                    }
+                    print(f"✅ Task {i+1} ({task_key}): {len(output_text)} characters from {agent_name}")
+                else:
+                    print(f"⚠️ Task {i+1} ({task_key}): No meaningful output from {agent_name}")
         
-        # No fallback needed - frontend will combine outputs
+        # Also check for any additional outputs in the result
+        if hasattr(result, 'output') and result.output:
+            print(f"📦 Found additional result output: {len(str(result.output))} characters")
+            if not outputs:
+                outputs['result'] = {
+                    'agent': 'CrewAI',
+                    'output': str(result.output)
+                }
+        
         return outputs
 
 

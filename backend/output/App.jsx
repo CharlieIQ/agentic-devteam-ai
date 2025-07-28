@@ -1,61 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';  
+import ReactDOM from 'react-dom';  
+import './index.css';  
+import { Application } from './main.py'; // Import the Application class from main.py
 
-function App() {
-  const [tasks, setTasks] = useState([]);
-  const [taskDescription, setTaskDescription] = useState('');
-  const [suggestedSchedule, setSuggestedSchedule] = useState([]);
-  const [loadBurnoutMessage, setLoadBurnoutMessage] = useState('');
+const App = () => {  
+    const [patients, setPatients] = useState([]);  
+    const [name, setName] = useState('');  
+    const [age, setAge] = useState('');  
+    const [symptoms, setSymptoms] = useState('');  
+    const [checkOutId, setCheckOutId] = useState('');  
+    const [message, setMessage] = useState('');  
 
-  useEffect(() => {
-    async function fetchSuggestedSchedule() {
-      const response = await axios.get('/suggest_schedule');
-      setSuggestedSchedule(response.data);
-    }
-    fetchSuggestedSchedule();
-  }, [tasks]);
+    const application = new Application();
 
-  useEffect(() => {
-    async function checkBurnout() {
-      const response = await axios.get('/check_burnout');
-      setLoadBurnoutMessage(response.data.message);
-    }
-    checkBurnout();
-  }, [tasks]);
-  
-  const addTask = async () => {
-    await axios.post('/add_task', { description: taskDescription });
-    setTasks([...tasks, { name: taskDescription, status: 'in progress' }]);
-    setTaskDescription('');
-  };
+    const checkIn = () => {  
+        const patient = application.check_in(name, parseInt(age), symptoms);  
+        setPatients([...patients, patient]);  
+        setMessage(`Patient ${patient.name} checked in!`);  
+        setName('');  
+        setAge('');  
+        setSymptoms('');  
+    };  
 
-  return (
-    <div>
-      <h1>Intelligent Student Planner</h1>
-      <input
-        type="text"
-        value={taskDescription}
-        onChange={(e) => setTaskDescription(e.target.value)}
-        placeholder="Add a task (e.g., 'Finish comp sci paper by Friday')"
-      />
-      <button onClick={addTask}>Add Task</button>
-      <h2>Current Tasks</h2>
-      <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>{task.name} - {task.status}</li>
-        ))}
-      </ul>
-      <h2>Suggested Schedule</h2>
-      <ul>
-        {suggestedSchedule.map((schedule, index) => (
-          <li key={index}>{schedule.task} at {schedule.scheduled_time}</li>
-        ))}
-      </ul>
-      {loadBurnoutMessage && <div>{loadBurnoutMessage}</div>}
-    </div>
-  );
-}
+    const checkOut = () => {  
+        const response = application.check_out(parseInt(checkOutId));  
+        if (response.message === 'Patient checked out successfully') {  
+            setPatients(patients.filter(patient => patient.id !== parseInt(checkOutId)));  
+        }  
+        setMessage(response.message);  
+        setCheckOutId('');  
+    };  
 
-const rootElement = document.getElementById('root');
-ReactDOM.render(<App />, rootElement);
+    useEffect(() => {  
+      setPatients(application.list_patients());  
+    }, [application]);  
+
+    return (  
+        <div>  
+            <h1>Emergency Room App</h1>  
+            <div>  
+                <h2>Check In Patient</h2>  
+                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />  
+                <input type="number" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} />  
+                <input type="text" placeholder="Symptoms" value={symptoms} onChange={(e) => setSymptoms(e.target.value)} />  
+                <button onClick={checkIn}>Check In</button>  
+            </div>  
+            <div>  
+                <h2>Patients List</h2>  
+                <ul>  
+                    {patients.map(patient => (  
+                        <li key={patient.id}>  
+                            {patient.name} (ID: {patient.id}, Status: {patient.status})  
+                        </li>  
+                    ))}  
+                </ul>  
+            </div>  
+            <div>  
+                <h2>Check Out Patient</h2>  
+                <input type="number" placeholder="Patient ID" value={checkOutId} onChange={(e) => setCheckOutId(e.target.value)} />  
+                <button onClick={checkOut}>Check Out</button>  
+            </div>  
+            {message && <div><strong>{message}</strong></div>}  
+        </div>  
+    );  
+};  
+
+ReactDOM.render(<App />, document.getElementById('root'));

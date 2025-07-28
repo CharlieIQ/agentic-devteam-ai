@@ -26,6 +26,7 @@ class CrewAILogCapture:
     Attributes:
         original_stream: The original stdout or stderr stream being captured.
         buffer: A StringIO buffer to temporarily hold log lines before processing.
+        recent_logs: A set to track recent log messages to prevent infinite repetition.
     Methods:
         write(text: str) -> None: Write text to the original stream and process for log queue.
         _clean_ansi_codes(text: str) -> str: Remove ANSI escape codes and clean up the text.
@@ -49,6 +50,10 @@ class CrewAILogCapture:
     def __init__(self, original_stream):
         self.original_stream = original_stream
         self.buffer = io.StringIO()
+        self.recent_logs = set()  # Track recent logs to prevent repetition
+        self.max_recent_logs = 100  # Maximum number of recent logs to track
+        self.message_counts = {}  # Track how many times each message appears
+        self.max_repetitions = 3  # Maximum times a message can be repeated
         
     def write(self, text: str) -> None:
         """Write text to original stream and process for log queue."""
@@ -61,10 +66,25 @@ class CrewAILogCapture:
         for line in lines:
             cleaned_line = self._clean_ansi_codes(line)
             if self._is_agent_log(cleaned_line) and cleaned_line.strip():
-                try:
-                    log_queue.put(cleaned_line)
-                except:
-                    pass
+                # Check for repetition to prevent infinite loops
+                if cleaned_line not in self.recent_logs:
+                    # Check rate limiting
+                    if cleaned_line in self.message_counts:
+                        if self.message_counts[cleaned_line] >= self.max_repetitions:
+                            continue  # Skip this message, it's been repeated too much
+                        self.message_counts[cleaned_line] += 1
+                    else:
+                        self.message_counts[cleaned_line] = 1
+                    
+                    try:
+                        log_queue.put(cleaned_line)
+                        # Add to recent logs and maintain size limit
+                        self.recent_logs.add(cleaned_line)
+                        if len(self.recent_logs) > self.max_recent_logs:
+                            # Remove oldest entries (convert to list, remove first, convert back)
+                            self.recent_logs = set(list(self.recent_logs)[-self.max_recent_logs//2:])
+                    except:
+                        pass
     
     def _clean_ansi_codes(self, text: str) -> str:
         """Remove ANSI escape codes and clean up the text."""
@@ -86,11 +106,10 @@ class CrewAILogCapture:
         if not line or len(line.strip()) < 3:
             return False
 
-        # Much more relaxed include patterns - capture most agent activity
+        # More restrictive include patterns - focus on actual agent activity
         include_patterns = [
             r'^Agent:\s',                # Agent: ...
             r'^Task:\s',                 # Task: ...
-            r'Agent.*:',                 # Any agent speaking
             r'Requirements:',            # Requirements: ...
             r'Design:',                  # Design discussions
             r'Implementation:',          # Implementation notes
@@ -119,21 +138,33 @@ class CrewAILogCapture:
             r'⚙️',                       # Backend/systems
             r'^\s*\d+\.\s',              # Numbered lists
             r'^\s*[-*]\s',               # Bullet points
+            r'Let me',                   # Agent thinking
+            r'I need to',                # Agent planning
+            r'I will',                   # Agent actions
+            r'Here is',                  # Agent output
+            r'Here\'s',                  # Agent output
+            r'Executing Task', r'Agent Started', r'Agent Completed',  # Status messages
         ]
 
-        # Much more restricted exclude patterns - only exclude noise
+        # Much more restrictive exclude patterns - exclude CrewAI noise
         exclude_patterns = [
             r'werkzeug', r'HTTP/1.1', r'Starting Flask', r'Running on',
             r'__main__', r'\[HEARTBEAT\]', r'Traceback', r'^\s*$',
             r'Client connected', r'Client disconnected',
-            r'^Status: (Starting|Stopping|Complete)$',  # Only exclude basic status
+            r'^Status:', r'^Assigned to:', r'^Crew:',  # CrewAI internal messages
+            r'^├──', r'^└──', r'^│', r'^╭─', r'^╰─', r'─────',  # Tree structures
+            r'🤖', r'📋', r'✅$', r'⚠️', r'❌',  # Status emojis
+            r'Engineering Team Lead', r'Senior Backend Engineer',  # Role assignments
+            r'Frontend Engineer', r'Test Engineer', r'Task Completion',
+            r'Python Engineer who can write code',  # Specific repetitive assignment
             r'─{3,}',  # Long dashes (borders)
+            r'^\s*$',  # Empty lines
         ]
 
         import re
         # If any exclude pattern matches, skip
         for pat in exclude_patterns:
-            if re.search(pat, line):
+            if re.search(pat, line, re.IGNORECASE):
                 return False
 
         # If any include pattern matches, allow
@@ -203,3 +234,93 @@ def setup_crewai_log_capture() -> tuple:
 def get_log_queue() -> queue.Queue:
     """Get the global log queue."""
     return log_queue
+
+
+def test_log_filtering():
+    """Test the log filtering functionality."""
+    # Create a test instance
+    import io
+    test_stream = io.StringIO()
+    capture = CrewAILogCapture(test_stream)
+    
+    # Test messages that should be included
+    good_messages = [
+        "Agent: I will analyze the requirements",
+        "Let me implement this feature",
+        "Requirements: Create a user management system",
+        "Design: The system will have these components",
+        "I need to write unit tests for this",
+        "Here is the implementation:",
+        "Testing: Running unit tests",
+        "Frontend: Creating the UI components",
+        "Backend: Implementing the API",
+        "1. First step",
+        "2. Second step",
+        "- Bullet point",
+        "* Another bullet",
+        "📝 Requirements analysis",
+        "🔧 Implementation",
+        "💻 Code development",
+        "🎨 UI design",
+        "🧪 Testing",
+        "⚙️ Backend systems"
+    ]
+    
+    # Test messages that should be excluded
+    bad_messages = [
+        "Assigned to: Python Engineer who can write code",
+        "Status: Starting",
+        "Status: Complete",
+        "Crew: Engineering Team",
+        "Executing Task",
+        "Agent Started",
+        "Agent Completed",
+        "Engineering Team Lead",
+        "Senior Backend Engineer",
+        "Frontend Engineer",
+        "Test Engineer",
+        "Task Completion",
+        "🤖 Agent",
+        "📋 Task",
+        "✅ Complete",
+        "⚠️ Warning",
+        "❌ Error",
+        "├── Task",
+        "└── Agent",
+        "│   Assigned to:",
+        "╭─ Crew",
+        "╰─ End",
+        "─────",
+        "werkzeug",
+        "HTTP/1.1",
+        "Starting Flask",
+        "Running on",
+        "__main__",
+        "[HEARTBEAT]",
+        "Traceback",
+        "",
+        "   ",
+        "Client connected",
+        "Client disconnected"
+    ]
+    
+    print("🧪 Testing log filtering...")
+    
+    # Test good messages
+    included_count = 0
+    for msg in good_messages:
+        capture.write(msg + "\n")
+        if msg in capture.recent_logs:
+            included_count += 1
+    
+    # Test bad messages
+    excluded_count = 0
+    for msg in bad_messages:
+        capture.write(msg + "\n")
+        if msg not in capture.recent_logs:
+            excluded_count += 1
+    
+    print(f"✅ Included {included_count}/{len(good_messages)} good messages")
+    print(f"✅ Excluded {excluded_count}/{len(bad_messages)} bad messages")
+    
+    return included_count == len(good_messages) and excluded_count == len(bad_messages)

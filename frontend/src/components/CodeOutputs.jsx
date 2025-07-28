@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import AgentOutput from './AgentOutput';
 import { getTeamConfig } from '../services/api';
+// Import modern icons
+import { 
+  Code, 
+  Package, 
+  Loader2,
+  Lightbulb,
+  Layout,
+  Server,
+  Palette,
+  TestTube
+} from 'lucide-react';
 
 /**
  * CodeOutputs component displays the generated code outputs from the AI agents.
@@ -55,9 +66,12 @@ function CodeOutputs({ outputs, loading }) {
     if (loading) {
         return (
             <div className="section">
-                <h2>💻 Generated Code</h2>
+                <h2>
+                    <Code className="section-icon" />
+                    Generated Code
+                </h2>
                 <div className="loading-state">
-                    <div className="loading-spinner">🔄</div>
+                    <Loader2 className="loading-spinner" />
                     <p>Your development team is working...</p>
                 </div>
             </div>
@@ -67,9 +81,13 @@ function CodeOutputs({ outputs, loading }) {
     if (!outputs || Object.keys(outputs).length === 0) {
         return (
             <div className="section">
-                <h2>💻 Generated Code</h2>
+                <h2>
+                    <Code className="section-icon" />
+                    Generated Code
+                </h2>
                 <div className="empty-state">
-                    <p>💡 Click "Generate Code" to start building your project!</p>
+                    <Lightbulb className="empty-icon" />
+                    <p>Click "Generate Code" to start building your project!</p>
                 </div>
             </div>
         );
@@ -82,7 +100,10 @@ function CodeOutputs({ outputs, loading }) {
 
     return (
         <div className="section">
-            <h2>Generated Code</h2>
+            <h2>
+                <Code className="section-icon" />
+                Generated Code
+            </h2>
             <div className="outputs-container">
                 {/* Combined output at the top */}
                 <AgentOutput
@@ -90,7 +111,7 @@ function CodeOutputs({ outputs, loading }) {
                     title="Complete Project Output"
                     agent="Engineering Team"
                     output={getCombinedOutput()}
-                    icon="📦"
+                    icon={<Package className="output-icon" />}
                 />
                 
                 {/* Individual outputs - now dynamically configured */}
@@ -106,7 +127,7 @@ function CodeOutputs({ outputs, loading }) {
                             title={config.title}
                             agent={config.name}
                             output={output.output}
-                            icon={config.icon}
+                            icon={getOutputIcon(config.title)}
                         />
                     );
                 })}
@@ -114,6 +135,22 @@ function CodeOutputs({ outputs, loading }) {
         </div>
     );
 }
+
+// Helper function to get the appropriate icon for each output type
+const getOutputIcon = (title) => {
+    switch (title.toLowerCase()) {
+        case 'technical design':
+            return <Layout className="output-icon" />;
+        case 'backend code':
+            return <Server className="output-icon" />;
+        case 'frontend code':
+            return <Palette className="output-icon" />;
+        case 'test suite':
+            return <TestTube className="output-icon" />;
+        default:
+            return <Code className="output-icon" />;
+    }
+};
 
 // Fallback configuration
 const FALLBACK_OUTPUT_CONFIG = {

@@ -1,5 +1,7 @@
 import React from 'react';
 import { saveRequirements } from '../services/api';
+// Import modern icons
+import { ClipboardList, Save } from 'lucide-react';
 
 /**
  * RequirementsForm component allows users to input and save product requirements.
@@ -21,7 +23,10 @@ function RequirementsForm({ requirements, setRequirements }) {
 
     return (
         <div className="section requirements">
-            <h2>📋 Product Requirements</h2>
+            <h2>
+                <ClipboardList className="section-icon" />
+                Product Requirements
+            </h2>
             <textarea
                 rows={8}
                 value={requirements}
@@ -31,7 +36,8 @@ function RequirementsForm({ requirements, setRequirements }) {
 Example: Create a task management system with the ability to create, read, update, and delete tasks. Each task should have a title, description, due date, and status."
             />
             <button type="button" onClick={handleSaveRequirements}>
-                💾 Save Requirements
+                <Save className="btn-icon" />
+                Save Requirements
             </button>
         </div>
     );

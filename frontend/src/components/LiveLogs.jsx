@@ -1,5 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../styles/livelogs.css";
+// Import modern icons
+import { 
+  Bot, 
+  Wifi, 
+  WifiOff, 
+  ChevronDown, 
+  ChevronRight, 
+  Play, 
+  Square, 
+  Trash2,
+  Activity,
+  Zap
+} from 'lucide-react';
 
 /**
  * LiveLogs component displays live logs from a server-sent events (SSE) source.
@@ -94,77 +107,71 @@ const LiveLogs = () => {
     };
 
     return (
-        <div className="section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1em' }}>
-                <h2>🤖 Live Agent Activity</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1em' }}>
-                    <span style={{ 
-                        color: isConnected ? '#28a745' : '#dc3545',
-                        fontSize: '0.9em',
-                        fontWeight: '600'
-                    }}>
-                        {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
-                    </span>
+        <div className="section live-logs-section">
+            <div className="live-logs-header">
+                <h2>
+                    <Bot className="section-icon" />
+                    Live Agent Activity
+                </h2>
+                <div className="logs-controls">
+                    <div className="connection-status">
+                        {isConnected ? (
+                            <>
+                                <Wifi className="status-icon connected" />
+                                <span className="status-text connected">Connected</span>
+                            </>
+                        ) : (
+                            <>
+                                <WifiOff className="status-icon disconnected" />
+                                <span className="status-text disconnected">Disconnected</span>
+                            </>
+                        )}
+                    </div>
                     <button 
                         onClick={toggleShowLogs}
-                        style={{
-                            padding: '0.5em 1em',
-                            fontSize: '0.9em',
-                            background: showLogs ? '#0d6efd' : '#6c757d',
-                            border: 'none',
-                            borderRadius: '6px',
-                            color: 'white',
-                            cursor: 'pointer'
-                        }}
+                        className={`logs-toggle-button ${showLogs ? 'active' : ''}`}
                     >
-                        {showLogs ? '▼ Hide Logs' : '▶ Show Logs'}
+                        {showLogs ? <ChevronDown /> : <ChevronRight />}
+                        {showLogs ? 'Hide Logs' : 'Show Logs'}
                     </button>
-                    <button 
-                        onClick={toggleAutoscroll}
-                        style={{
-                            padding: '0.5em 1em',
-                            fontSize: '0.9em',
-                            background: autoscroll ? '#198754' : '#6c757d',
-                            border: 'none',
-                            borderRadius: '6px',
-                            color: 'white',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {autoscroll ? '🟢 Autoscroll On' : '⚪ Autoscroll Off'}
-                    </button>
-                    <button 
-                        onClick={clearLogs}
-                        style={{
-                            padding: '0.5em 1em',
-                            fontSize: '0.9em',
-                            background: '#6c757d',
-                            border: 'none',
-                            borderRadius: '6px',
-                            color: 'white',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        🗑️ Clear
-                    </button>
+                    {showLogs && (
+                        <>
+                            <button 
+                                onClick={toggleAutoscroll}
+                                className={`autoscroll-btn ${autoscroll ? 'active' : ''}`}
+                                title={autoscroll ? 'Autoscroll enabled' : 'Autoscroll disabled'}
+                            >
+                                {autoscroll ? <Play /> : <Square />}
+                                {autoscroll ? 'Auto' : 'Manual'}
+                            </button>
+                            <button 
+                                onClick={clearLogs}
+                                className="clear-btn"
+                                title="Clear all logs"
+                            >
+                                <Trash2 />
+                                Clear
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
             {showLogs && (
-                <div className="livelogs-container">
+                <div className="logs-container">
                     {logs.length === 0 ? (
-                        <div className="livelogs-empty">
+                        <div className="logs-empty">
                             {isConnected ? (
                                 <>
-                                    <div className="livelogs-empty-icon">🤖</div>
-                                    <div>Waiting for AI agents to start working...</div>
-                                    <div className="livelogs-empty-hint">
+                                    <Bot className="empty-icon" />
+                                    <div className="empty-text">Waiting for AI agents to start working...</div>
+                                    <div className="empty-hint">
                                         Click "Generate Code" to see live agent activity
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <div className="livelogs-empty-icon">🔌</div>
-                                    <div>Connecting to agent logs...</div>
+                                    <Activity className="empty-icon" />
+                                    <div className="empty-text">Connecting to agent logs...</div>
                                 </>
                             )}
                         </div>
@@ -173,13 +180,13 @@ const LiveLogs = () => {
                             <div
                                 key={idx}
                                 className={
-                                    "livelogs-line" +
-                                    (log.includes('🤖') ? ' livelogs-line-agent' :
-                                     log.includes('✅') ? ' livelogs-line-success' :
-                                     log.includes('❌') ? ' livelogs-line-error' :
-                                     log.includes('⚠️') ? ' livelogs-line-warning' :
-                                     log.includes('📋') ? ' livelogs-line-copy' :
-                                     log.includes('Agent:') ? ' livelogs-line-agentname' :
+                                    "log-line" +
+                                    (log.includes('🤖') ? ' log-line-agent' :
+                                     log.includes('✅') ? ' log-line-success' :
+                                     log.includes('❌') ? ' log-line-error' :
+                                     log.includes('⚠️') ? ' log-line-warning' :
+                                     log.includes('📋') ? ' log-line-copy' :
+                                     log.includes('Agent:') ? ' log-line-agentname' :
                                      '')
                                 }
                             >

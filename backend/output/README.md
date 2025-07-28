@@ -1,173 +1,160 @@
 ```markdown
-# Intelligent Student Planner App
+# Emergency Room App
 
-The Intelligent Student Planner App is designed to help students manage their assignments, deadlines, and overall productivity while also monitoring their mental well-being. The app incorporates AI to create adaptive study schedules, integrates with Google Calendar, parses course syllabi from PDFs, and provides a natural language interface for adding tasks. The app includes features like Pomodoro timers, focus mode, and burn-out detection.
-
-## Features
-
-- **Task Management**: Track assignments, deadlines, and exams.
-- **AI-Powered Scheduling**: Automatically suggest daily study schedules based on workload, deadlines, and productivity trends.
-- **Integration**: Connects with Google Calendar and learning platforms such as Moodle.
-- **Focus Mode**: Implements Pomodoro sessions and motivational nudges.
-- **Natural Language Processing**: Add tasks using phrases like ‘Finish comp sci paper by Friday’.
-- **AI Coach**: Dynamically adjusts schedules based on student progress.
-- **Burnout Detection**: Suggests breaks when the workload becomes overwhelming.
+Welcome to the Emergency Room App! This application allows for patient check-in, information retrieval, symptom updates, and check-out processes, all aimed at improving the efficiency of emergency room management.
 
 ## Table of Contents
 
+- [Features](#features)
 - [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Setup Instructions](#setup-instructions)
 - [API Documentation](#api-documentation)
-  - [Application](#application)
-  - [CalendarIntegration](#calendarintegration)
-  - [PDFParser](#pdfparser)
-  - [LearningPlatformIntegration](#learningplatformintegration)
-  - [FocusMode](#focusmode)
-  - [AICoach](#aicoach)
-  - [BurnoutDetector](#burnoutdetector)
-- [Examples](#examples)
-- [Contributing](#contributing)
-- [License](#license)
+- [Usage Examples](#usage-examples)
+
+## Features
+
+- Check in new patients with their name, age, and symptoms.
+- Retrieve patient information based on their ID.
+- Update symptoms for existing patients.
+- Check out patients from the emergency room.
+- List all currently checked-in patients.
 
 ## Requirements
 
 - Python 3.x
-- Flask (for backend server)
-- Axios (for making HTTP requests from front end)
-- React (for frontend)
-- PyPDF2 (for PDF parsing)
+- Node.js (for frontend)
+- React (installed via npm/yarn)
+- A modern web browser
 
-## Installation
+## Setup Instructions
 
-1. **Clone the repository:**
+To set up this project on your local machine, follow these steps:
+
+1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/intelligent-student-planner.git
-   cd intelligent-student-planner
+   git clone https://github.com/yourusername/emergency-room-app.git
+   cd emergency-room-app
    ```
 
-2. **Set up the backend:**
+2. **Set up the backend**
+   - Navigate to the backend directory (if separated).
+   - Ensure you have Python 3 installed.
+   - Install any required libraries (if applicable).
+
+    Example command:
    ```bash
-   cd backend
-   pip install -r requirements.txt
+   pip install -r requirements.txt  # if you have any Python dependencies
    ```
 
-3. **Set up the frontend:**
+3. **Set up the frontend**
+   - Navigate to the frontend directory.
+   - Install Node.js if you haven't done so yet.
+   - Run:
    ```bash
-   cd frontend
    npm install
    ```
 
-4. **Run the backend server:**
+4. **Run the application**
+   - Start the backend server (if applicable):
    ```bash
-   cd backend
-   python app.py
+   python main.py   # or however your backend is configured
    ```
-
-5. **Run the frontend application:**
+   - Start the React app:
    ```bash
-   cd frontend
    npm start
    ```
 
-## Usage
-
-To use the Intelligent Student Planner app, simply add your tasks using the input field, and the app will automatically suggest a study schedule based on your upcoming deadlines.
+5. **Access the application**
+   Open your web browser and go to `http://localhost:3000` to access the Emergency Room App.
 
 ## API Documentation
 
-### Application
+### Class: `Application`
 
-The `Application` class manages tasks, deadlines, and schedules.
+#### `__init__()`
+Initializes the Application with an empty list of patients and a counter for patient IDs.
 
-#### Methods
+#### `check_in(name: str, age: int, symptoms: str) -> dict`
+Checks in a new patient to the emergency room.
 
-- **add_task(task_description: str)**: Adds a new task based on natural language input.
-- **suggest_schedule()**: Generates a daily study schedule using AI.
-- **track_productivity()**: Updates productivity trends.
-- **enable_focus_mode()**: Activates focus mode features.
-- **update_task_progress(task_name: str, status: str)**: Updates the status of a specific task.
-- **check_burnout()**: Analyzes workload for burnout detection.
+**Parameters:**
+- `name` (str): The name of the patient.
+- `age` (int): The age of the patient.
+- `symptoms` (str): A description of the patient's symptoms.
 
-### CalendarIntegration
+**Returns:**
+- `dict`: A dictionary containing the patient's ID and status.
 
-Handles Google Calendar interactions.
+#### `get_patient_info(patient_id: int) -> dict`
+Retrieves information for a specific patient by ID.
 
-#### Methods
+**Parameters:**
+- `patient_id` (int): The ID of the patient.
 
-- **sync_events()**: Sync events from Google Calendar.
-- **add_event(event_data: dict)**: Adds events to Google Calendar.
+**Returns:**
+- `dict`: The patient's information or a message if not found.
 
-### PDFParser
+#### `check_out(patient_id: int) -> dict`
+Checks out a patient from the emergency room.
 
-Parses PDF syllabi for course information.
+**Parameters:**
+- `patient_id` (int): The ID of the patient to be checked out.
 
-#### Methods
+**Returns:**
+- `dict`: A message indicating the checkout status.
 
-- **parse_syllabus(pdf_file_path: str)**: Extracts deadlines and assignments from a PDF syllabus.
+#### `list_patients() -> list`
+Lists all currently checked-in patients with their status.
 
-### LearningPlatformIntegration
+**Returns:**
+- `list`: A list of patients currently checked in.
 
-Integrates with learning platforms.
+#### `update_symptoms(patient_id: int, new_symptoms: str) -> dict`
+Updates the symptoms of a patient based on their ID.
 
-#### Methods
+**Parameters:**
+- `patient_id` (int): The ID of the patient to update.
+- `new_symptoms` (str): The new symptoms description.
 
-- **fetch_assignments()**: Fetches course assignments.
+**Returns:**
+- `dict`: The updated patient information or a message if not found.
 
-### FocusMode
+## Usage Examples
 
-Implements features to enhance concentration.
-
-#### Methods
-
-- **start_pomodoro()**: Starts a Pomodoro timer.
-
-### AICoach
-
-Provides AI-driven coaching.
-
-#### Methods
-
-- **adjust_plan(tasks: list)**: Adjusts plans based on task status.
-
-### BurnoutDetector
-
-Monitors user workload.
-
-#### Methods
-
-- **analyze_workload(tasks: list)**: Suggests breaks based on workload analysis.
-
-## Examples
-
-### Adding a Task
-
-To add a task, use the input box as follows:
-```
-Finish comp sci paper by Friday
+### Checking In a Patient
+```javascript
+const patient = application.check_in('John Doe', 30, 'Fever and cough');
+console.log(patient);
+// Output: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked In' }
 ```
 
-### Suggested Schedule
-
-After tasks are added, the app will suggest a schedule similar to:
-
-```
-1. Finish comp sci paper at 2 PM
-2. Study for Mathematics at 3 PM
+### Retrieving Patient Information
+```javascript
+const patientInfo = application.get_patient_info(1);
+console.log(patientInfo);
+// Output: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked In' }
 ```
 
-### Checking Burnout
-
-To check for burnout, the app will analyze current tasks and provide feedback:
+### Checking Out a Patient
+```javascript
+const response = application.check_out(1);
+console.log(response);
+// Output: { message: 'Patient checked out successfully', patient_info: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked Out' } }
 ```
-You have a heavy workload. Consider taking a break!
+
+### Updating Patient Symptoms
+```javascript
+const updateResponse = application.update_symptoms(1, 'Fever');
+console.log(updateResponse);
+// Output: { message: 'Symptoms updated', patient_info: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever', status: 'Checked In' } }
 ```
 
-## Contributing
+### List Current Patients
+```javascript
+const currentPatients = application.list_patients();
+console.log(currentPatients);
+// Output: [{ id: 1, name: 'John Doe', age: 30, symptoms: 'Fever', status: 'Checked In' }]
+```
 
-We welcome contributions to the Intelligent Student Planner App. Please fork the repository and submit a pull request if you have enhancements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+For further information or issues, please feel free to reach out!
 ```
