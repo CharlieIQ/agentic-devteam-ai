@@ -18,11 +18,10 @@ The project demonstrates the power of agentic AI by automating complex developme
 ## Technologies Used
 - **Frontend**: React 19, Vite, CSS3, React Markdown
 - **Backend**: Python 3.11+, Flask, CrewAI, OpenAI API
-- **AI Model**: GPT-4o-mini for optimal cost-performance balance
-- **Development**: ESLint, Hot Reload, Virtual Environment Management
-
+- **AI Model**: GPT-4o-mini because it's cheap and good enough
+- 
 ## AI Agents
-My system employs four specialized AI agents working in harmony:
+My system employs eight specialized AI agents working in harmony:
 
 - **Engineering Lead**: Analyzes requirements and creates detailed software architecture designs
 - **Frontend Engineer**: Develops React-based user interfaces following design specifications
@@ -244,10 +243,6 @@ deployment_task:
 - `POST /generate` - Trigger agent workflow with requirements
 - `GET /logs` - Retrieve execution logs
 - `GET /requirements` - Get current requirements
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
