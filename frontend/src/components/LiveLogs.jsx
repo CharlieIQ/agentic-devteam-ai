@@ -55,7 +55,7 @@ const LiveLogs = () => {
     useEffect(() => {
         // Ensure the connection is established only once
         console.log("Connecting to live agent logs...");
-        const eventSource = new EventSource("http://localhost:5001/logs");
+        const eventSource = new EventSource("http://localhost:5001/api/logs");
         // Handle connection open event
         eventSource.onopen = () => {
             console.log("Connected to live agent logs");

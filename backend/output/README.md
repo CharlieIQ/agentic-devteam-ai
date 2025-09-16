@@ -1,160 +1,173 @@
 ```markdown
-# Emergency Room App
+# Mini ERP System
 
-Welcome to the Emergency Room App! This application allows for patient check-in, information retrieval, symptom updates, and check-out processes, all aimed at improving the efficiency of emergency room management.
+## Overview
+
+The Mini ERP System is a simple enterprise resource planning tool that integrates different lines of business (LoB) including HR, Finance, and Inventory. This documentation provides setup instructions, API documentation, and usage examples to help developers use and extend the system effectively.
 
 ## Table of Contents
-
-- [Features](#features)
 - [Requirements](#requirements)
-- [Setup Instructions](#setup-instructions)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Starting the Application](#starting-the-application)
+  - [Accessing Modules](#accessing-modules)
 - [API Documentation](#api-documentation)
+  - [HR Module API](#hr-module-api)
+  - [Finance Module API](#finance-module-api)
+  - [Inventory Module API](#inventory-module-api)
 - [Usage Examples](#usage-examples)
-
-## Features
-
-- Check in new patients with their name, age, and symptoms.
-- Retrieve patient information based on their ID.
-- Update symptoms for existing patients.
-- Check out patients from the emergency room.
-- List all currently checked-in patients.
 
 ## Requirements
 
-- Python 3.x
-- Node.js (for frontend)
-- React (installed via npm/yarn)
-- A modern web browser
+- Python >= 3.7
+- Flask (for backend API)
+- React (for frontend)
+- Axios (for making HTTP requests in React)
 
-## Setup Instructions
+## Installation
 
-To set up this project on your local machine, follow these steps:
-
-1. **Clone the repository**
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/emergency-room-app.git
-   cd emergency-room-app
+   git clone https://github.com/yourusername/minierp.git
+   cd minierp
    ```
 
-2. **Set up the backend**
-   - Navigate to the backend directory (if separated).
-   - Ensure you have Python 3 installed.
-   - Install any required libraries (if applicable).
-
-    Example command:
+2. **Set up the backend:**
+   - Navigate to the backend directory and install required libraries:
    ```bash
-   pip install -r requirements.txt  # if you have any Python dependencies
+   cd backend
+   pip install -r requirements.txt
    ```
 
-3. **Set up the frontend**
-   - Navigate to the frontend directory.
-   - Install Node.js if you haven't done so yet.
-   - Run:
+3. **Set up the frontend:**
+   - Navigate to the frontend directory and install required libraries:
    ```bash
+   cd frontend
    npm install
    ```
 
-4. **Run the application**
-   - Start the backend server (if applicable):
+4. **Run the application:**
+   - Start the backend server:
    ```bash
-   python main.py   # or however your backend is configured
+   python app.py
    ```
-   - Start the React app:
+   - In a new terminal window, navigate to the frontend directory and start the frontend server:
    ```bash
    npm start
    ```
 
-5. **Access the application**
-   Open your web browser and go to `http://localhost:3000` to access the Emergency Room App.
+## Usage
+
+### Starting the Application
+
+After running the backend and frontend servers, open your web browser and go to `http://localhost:3000`. You should see the Mini ERP System interface.
+
+### Accessing Modules
+
+The system includes three main modules:
+- HR Module
+- Finance Module
+- Inventory Module
+
+You can interact with each module through the provided buttons in the user interface.
 
 ## API Documentation
 
-### Class: `Application`
+### HR Module API
 
-#### `__init__()`
-Initializes the Application with an empty list of patients and a counter for patient IDs.
+- **Add Employee**
+  - **Endpoint:** `POST /api/hr/add`
+  - **Request Body:**
+    ```json
+    {
+      "employeeId": int,
+      "name": "string",
+      "position": "string"
+    }
+    ```
 
-#### `check_in(name: str, age: int, symptoms: str) -> dict`
-Checks in a new patient to the emergency room.
+- **Get All Employees**
+  - **Endpoint:** `GET /api/hr`
+  - **Response:**
+    ```json
+    {
+      "employees": {
+        "employeeId": {
+          "name": "string",
+          "position": "string"
+        }
+      }
+    }
+    ```
 
-**Parameters:**
-- `name` (str): The name of the patient.
-- `age` (int): The age of the patient.
-- `symptoms` (str): A description of the patient's symptoms.
+### Finance Module API
 
-**Returns:**
-- `dict`: A dictionary containing the patient's ID and status.
+- **Add Budget**
+  - **Endpoint:** `POST /api/finance/add`
+  - **Request Body:**
+    ```json
+    {
+      "budgetId": int,
+      "amount": float,
+      "description": "string"
+    }
+    ```
 
-#### `get_patient_info(patient_id: int) -> dict`
-Retrieves information for a specific patient by ID.
+- **Get All Budgets**
+  - **Endpoint:** `GET /api/finance`
+  - **Response:**
+    ```json
+    {
+      "budgets": {
+        "budgetId": {
+          "amount": float,
+          "description": "string"
+        }
+      }
+    }
+    ```
 
-**Parameters:**
-- `patient_id` (int): The ID of the patient.
+### Inventory Module API
 
-**Returns:**
-- `dict`: The patient's information or a message if not found.
+- **Add Product**
+  - **Endpoint:** `POST /api/inventory/add`
+  - **Request Body:**
+    ```json
+    {
+      "productId": int,
+      "name": "string",
+      "stock": int
+    }
+    ```
 
-#### `check_out(patient_id: int) -> dict`
-Checks out a patient from the emergency room.
-
-**Parameters:**
-- `patient_id` (int): The ID of the patient to be checked out.
-
-**Returns:**
-- `dict`: A message indicating the checkout status.
-
-#### `list_patients() -> list`
-Lists all currently checked-in patients with their status.
-
-**Returns:**
-- `list`: A list of patients currently checked in.
-
-#### `update_symptoms(patient_id: int, new_symptoms: str) -> dict`
-Updates the symptoms of a patient based on their ID.
-
-**Parameters:**
-- `patient_id` (int): The ID of the patient to update.
-- `new_symptoms` (str): The new symptoms description.
-
-**Returns:**
-- `dict`: The updated patient information or a message if not found.
+- **Get All Products**
+  - **Endpoint:** `GET /api/inventory`
+  - **Response:**
+    ```json
+    {
+      "products": {
+        "productId": {
+          "name": "string",
+          "stock": int
+        }
+      }
+    }
+    ```
 
 ## Usage Examples
 
-### Checking In a Patient
-```javascript
-const patient = application.check_in('John Doe', 30, 'Fever and cough');
-console.log(patient);
-// Output: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked In' }
-```
+1. **Adding an Employee:**
+   Click on the "Add Employee" button, input the Employee ID, Name, and Position in the prompts that appear.
 
-### Retrieving Patient Information
-```javascript
-const patientInfo = application.get_patient_info(1);
-console.log(patientInfo);
-// Output: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked In' }
-```
+2. **Adding a Budget:**
+   Click on the "Add Budget" button, input the Budget ID, Amount, and Description in the corresponding prompts.
 
-### Checking Out a Patient
-```javascript
-const response = application.check_out(1);
-console.log(response);
-// Output: { message: 'Patient checked out successfully', patient_info: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever and cough', status: 'Checked Out' } }
-```
+3. **Adding a Product:**
+   Click on the "Add Product" button, input the Product ID, Name, and Stock in the prompted inputs.
 
-### Updating Patient Symptoms
-```javascript
-const updateResponse = application.update_symptoms(1, 'Fever');
-console.log(updateResponse);
-// Output: { message: 'Symptoms updated', patient_info: { id: 1, name: 'John Doe', age: 30, symptoms: 'Fever', status: 'Checked In' } }
-```
+The data you enter will be stored in the backend and can be accessed from the respective module views.
 
-### List Current Patients
-```javascript
-const currentPatients = application.list_patients();
-console.log(currentPatients);
-// Output: [{ id: 1, name: 'John Doe', age: 30, symptoms: 'Fever', status: 'Checked In' }]
-```
+## Conclusion
 
-For further information or issues, please feel free to reach out!
+This README provides a comprehensive guide to setting up and using the Mini ERP System. For further assistance, please refer to the project's issue tracker or contact the maintainers.
 ```

@@ -7,7 +7,7 @@ from ..utils.logging import get_log_queue
 
 logs_bp = Blueprint('logs', __name__)
 
-@logs_bp.route('/logs')
+@logs_bp.route('/api/logs')
 def stream_logs():
     """Server-Sent Events endpoint for streaming live logs."""
     def generate():

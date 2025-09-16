@@ -8,7 +8,7 @@ from ..services.requirements_service import requirements_service
 generate_bp = Blueprint('generate', __name__)
 
 
-@generate_bp.route('/generate', methods=['POST'])
+@generate_bp.route('/api/code-generation', methods=['POST'])
 def generate_code():
     """
     This endpoint generates code based on provided requirements.

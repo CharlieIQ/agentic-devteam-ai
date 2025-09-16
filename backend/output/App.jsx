@@ -1,68 +1,67 @@
-import React, { useState, useEffect } from 'react';  
-import ReactDOM from 'react-dom';  
-import './index.css';  
-import { Application } from './main.py'; // Import the Application class from main.py
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
 
-const App = () => {  
-    const [patients, setPatients] = useState([]);  
-    const [name, setName] = useState('');  
-    const [age, setAge] = useState('');  
-    const [symptoms, setSymptoms] = useState('');  
-    const [checkOutId, setCheckOutId] = useState('');  
-    const [message, setMessage] = useState('');  
+const App = () => {
+    const [hrEmployees, setHrEmployees] = useState({});
+    const [financeBudgets, setFinanceBudgets] = useState({});
+    const [inventoryProducts, setInventoryProducts] = useState({});
 
-    const application = new Application();
+    const addEmployee = async () => {
+        const employeeId = prompt('Enter employee ID:');
+        const name = prompt('Enter employee name:');
+        const position = prompt('Enter employee position:');
+        await axios.post('/api/hr/add', { employeeId, name, position });
+        fetchHRData();
+    };
 
-    const checkIn = () => {  
-        const patient = application.check_in(name, parseInt(age), symptoms);  
-        setPatients([...patients, patient]);  
-        setMessage(`Patient ${patient.name} checked in!`);  
-        setName('');  
-        setAge('');  
-        setSymptoms('');  
-    };  
+    const fetchHRData = async () => {
+        const response = await axios.get('/api/hr');
+        setHrEmployees(response.data);
+    };
 
-    const checkOut = () => {  
-        const response = application.check_out(parseInt(checkOutId));  
-        if (response.message === 'Patient checked out successfully') {  
-            setPatients(patients.filter(patient => patient.id !== parseInt(checkOutId)));  
-        }  
-        setMessage(response.message);  
-        setCheckOutId('');  
-    };  
+    const addBudget = async () => {
+        const budgetId = prompt('Enter budget ID:');
+        const amount = prompt('Enter budget amount:');
+        const description = prompt('Enter budget description:');
+        await axios.post('/api/finance/add', { budgetId, amount, description });
+        fetchFinanceData();
+    };
 
-    useEffect(() => {  
-      setPatients(application.list_patients());  
-    }, [application]);  
+    const fetchFinanceData = async () => {
+        const response = await axios.get('/api/finance');
+        setFinanceBudgets(response.data);
+    };
 
-    return (  
-        <div>  
-            <h1>Emergency Room App</h1>  
-            <div>  
-                <h2>Check In Patient</h2>  
-                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />  
-                <input type="number" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} />  
-                <input type="text" placeholder="Symptoms" value={symptoms} onChange={(e) => setSymptoms(e.target.value)} />  
-                <button onClick={checkIn}>Check In</button>  
-            </div>  
-            <div>  
-                <h2>Patients List</h2>  
-                <ul>  
-                    {patients.map(patient => (  
-                        <li key={patient.id}>  
-                            {patient.name} (ID: {patient.id}, Status: {patient.status})  
-                        </li>  
-                    ))}  
-                </ul>  
-            </div>  
-            <div>  
-                <h2>Check Out Patient</h2>  
-                <input type="number" placeholder="Patient ID" value={checkOutId} onChange={(e) => setCheckOutId(e.target.value)} />  
-                <button onClick={checkOut}>Check Out</button>  
-            </div>  
-            {message && <div><strong>{message}</strong></div>}  
-        </div>  
-    );  
-};  
+    const addProduct = async () => {
+        const productId = prompt('Enter product ID:');
+        const name = prompt('Enter product name:');
+        const stock = prompt('Enter product stock:');
+        await axios.post('/api/inventory/add', { productId, name, stock });
+        fetchInventoryData();
+    };
+
+    const fetchInventoryData = async () => {
+        const response = await axios.get('/api/inventory');
+        setInventoryProducts(response.data);
+    };
+
+    return (
+        <div>
+            <h1>Mini ERP System</h1>
+            <h2>HR Module</h2>
+            <button onClick={addEmployee}>Add Employee</button>
+            <pre>{JSON.stringify(hrEmployees, null, 2)}</pre>
+
+            <h2>Finance Module</h2>
+            <button onClick={addBudget}>Add Budget</button>
+            <pre>{JSON.stringify(financeBudgets, null, 2)}</pre>
+
+            <h2>Inventory Module</h2>
+            <button onClick={addProduct}>Add Product</button>
+            <pre>{JSON.stringify(inventoryProducts, null, 2)}</pre>
+        </div>
+    );
+};
 
 ReactDOM.render(<App />, document.getElementById('root'));

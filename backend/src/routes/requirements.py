@@ -7,7 +7,7 @@ from ..config import Config
 
 requirements_bp = Blueprint('requirements', __name__)
 
-@requirements_bp.route('/requirements', methods=['POST'])
+@requirements_bp.route('/api/requirements', methods=['POST'])
 def set_requirements():
     """Set user requirements."""
     try:

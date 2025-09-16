@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 team_bp = Blueprint('team', __name__)
 
-@team_bp.route('/team-config', methods=['GET'])
+@team_bp.route('/api/teams/config', methods=['GET'])
 def get_team_config():
     """Get the team configuration for the frontend."""
     try:
