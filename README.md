@@ -239,10 +239,33 @@ deployment_task:
 
 ## API Endpoints
 
-- `GET /health` - Health check endpoint
-- `POST /generate` - Trigger agent workflow with requirements
-- `GET /logs` - Retrieve execution logs
-- `GET /requirements` - Get current requirements
+The backend provides a RESTful API with the following endpoints:
+
+- `GET /api/health` - Health check endpoint with CrewAI availability status
+- `GET /api/teams/config` - Get team configuration and agent status
+- `POST /api/requirements` - Save and validate user requirements
+- `POST /api/code-generation` - Trigger agent workflow with requirements
+- `GET /api/logs` - Server-sent events stream for real-time logs
+
+### Example Usage
+
+```bash
+# Health check
+curl http://localhost:5001/api/health
+
+# Get team configuration
+curl http://localhost:5001/api/teams/config
+
+# Save requirements
+curl -X POST http://localhost:5001/api/requirements \
+  -H "Content-Type: application/json" \
+  -d '{"requirements":"Build a todo app with React"}'
+
+# Generate code
+curl -X POST http://localhost:5001/api/code-generation \
+  -H "Content-Type: application/json" \
+  -d '{"requirements":"Create a login form with validation"}'
+```
 
 ## License
 

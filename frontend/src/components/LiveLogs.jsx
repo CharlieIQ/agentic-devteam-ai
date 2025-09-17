@@ -10,12 +10,15 @@ import {
   Play, 
   Square, 
   Trash2,
-  Activity,
-  Zap
+  Activity
 } from 'lucide-react';
 
 /**
  * LiveLogs component displays live logs from a server-sent events (SSE) source.
+ * It includes features such as autoscroll, clear logs, and connection status.
+ * 
+ * The reason this isn't in api.js is that api.js is designed for standard HTTP request-response 
+ * where this is a persistent connection using EventSource for real-time updates.
  * @returns {JSX.Element} The rendered LiveLogs component.
  */
 const LiveLogs = () => {

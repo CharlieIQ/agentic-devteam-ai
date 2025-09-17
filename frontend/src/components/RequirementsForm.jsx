@@ -11,6 +11,11 @@ import { ClipboardList, Save } from 'lucide-react';
  * @returns {JSX.Element} The rendered component.
  */
 function RequirementsForm({ requirements, setRequirements }) {
+    /**
+     * Handles saving the requirements to the backend.
+     * Alerts the user upon success or failure.
+     * @returns {Promise<void>} - Saves the current requirements.
+     */
     const handleSaveRequirements = async () => {
         try {
             await saveRequirements(requirements);
@@ -25,7 +30,7 @@ function RequirementsForm({ requirements, setRequirements }) {
         <div className="section requirements">
             <h2>
                 <ClipboardList className="section-icon" />
-                Product Requirements
+                Enter Your Product Requirements
             </h2>
             <textarea
                 rows={8}
